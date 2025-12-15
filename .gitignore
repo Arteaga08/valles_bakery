@@ -1,0 +1,14 @@
+# .gitignore
+
+# 1. Dependencias y Directorios de Node
+# Ignora la carpeta donde se instalan las librerías
+node_modules/
+
+# 2. Variables de Entorno y Configuración Sensible
+# Archivo que contiene claves secretas, contraseñas de BD, etc.
+.env
+
+# 3. Directorios de Build/Compilación
+# Si usas React, esta será la carpeta de producción
+dist/
+build/
