@@ -1,5 +1,5 @@
 // /backend/config/db.js
-
+import chalk from "chalk";
 import mongoose from "mongoose";
 
 const connectDB = async () => {
@@ -9,9 +9,9 @@ const connectDB = async () => {
       // useNewUrlParser: true,
       // useUnifiedTopology: true,
     });
-    console.log(`MongoDB Connected: ${conn.connection.host}`);
+    console.log(chalk.bold.green(`MongoDB Connected: ${conn.connection.host}`));
   } catch (error) {
-    console.error(`Error: ${error.message}`);
+    console.error(chalk.red(`Error: ${error.message}`));
     process.exit(1); // Exit with failure
   }
 };

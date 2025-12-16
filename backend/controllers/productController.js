@@ -99,4 +99,65 @@ const deleteProduct = asyncHandler(async (req, res) => {
   }
 });
 
-export { createProduct, getProducts, getProductById, deleteProduct };
+// @desc    Update Product
+// @route   PUT /api/products/:id
+// @access  Private (Admin only)
+const updateProduct = asyncHandler(async (req, res) => {
+  const {
+    name,
+    shortDescription,
+    longDescription,
+    price,
+    category,
+    images,
+    sizes,
+    preparationTimeMin,
+    isCustomizable,
+    isActive,
+  } = req.body;
+
+  const product = await Product.findById(req.params.id);
+
+  if (product) {
+    // 1. Actualización de campos básicos
+    product.shortDescription = shortDescription || product.shortDescription;
+    product.longDescription = longDescription || product.longDescription;
+    product.price = price !== undefined ? price : product.price;
+    product.category = category || product.category;
+    product.images = images || product.images;
+    product.sizes = sizes || product.sizes;
+    product.preparationTimeMin =
+      preparationTimeMin || product.preparationTimeMin;
+    product.isCustomizable =
+      isCustomizable !== undefined ? isCustomizable : product.isCustomizable;
+    product.isActive = isActive !== undefined ? isActive : product.isActive;
+
+    // 2. Lógica de Nombre y Slug Automático
+    if (name) {
+      product.name = name;
+      // Generamos un slug limpio: minúsculas, sin acentos ni caracteres especiales
+      product.slug = name
+        .toLowerCase()
+        .trim()
+        .normalize("NFD") // Separa acentos de las letras
+        .replace(/[\u0300-\u036f]/g, "") // Elimina los acentos
+        .replace(/[^\w\s-]/g, "") // Elimina todo lo que no sea letra, espacio o guion
+        .replace(/[\s_-]+/g, "-") // Reemplaza espacios por un solo guion
+        .replace(/^-+|-+$/g, ""); // Quita guiones al principio o final
+    }
+
+    const updatedProduct = await product.save();
+    res.json(updatedProduct);
+  } else {
+    res.status(404);
+    throw new Error("Product not found");
+  }
+});
+
+export {
+  createProduct,
+  getProducts,
+  getProductById,
+  deleteProduct,
+  updateProduct,
+};

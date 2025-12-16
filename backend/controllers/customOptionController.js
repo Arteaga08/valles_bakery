@@ -1,6 +1,4 @@
-// /backend/controllers/customOptionController.js
-
-import CustomOption from "../models/customOptionRoutes.js";
+import CustomOption from "../models/CustomOption.js";
 import asyncHandler from "express-async-handler";
 
 // @desc    Create a new Custom Option
@@ -24,19 +22,41 @@ const createCustomOption = asyncHandler(async (req, res) => {
   res.status(201).json(option);
 });
 
-// @desc    Get all Custom Options, optionally filtered by type
-// @route   GET /api/custom-options?type=Filling
-// @access  Public (Used for the custom product page)
+// @desc    Get all Custom Options
+// @route   GET /api/custom-options
+// @access  Public
 const getCustomOptions = asyncHandler(async (req, res) => {
-  const filter = { isActive: true }; // Solo opciones activas para el frontend
+  const filter = { isActive: true };
 
   if (req.query.type) {
-    // Permite filtrar por tipo de opción (ej: solo rellenos)
     filter.type = req.query.type;
   }
 
   const options = await CustomOption.find(filter).sort({ type: 1, name: 1 });
   res.status(200).json(options);
+});
+
+// @desc    Update Custom Option
+// @route   PUT /api/custom-options/:id
+// @access  Private (Admin only)
+const updateCustomOption = asyncHandler(async (req, res) => {
+  const { type, name, basePrice, image, isActive } = req.body;
+
+  const option = await CustomOption.findById(req.params.id);
+
+  if (option) {
+    option.type = type || option.type;
+    option.name = name || option.name;
+    option.basePrice = basePrice !== undefined ? basePrice : option.basePrice;
+    option.image = image || option.image;
+    option.isActive = isActive !== undefined ? isActive : option.isActive;
+
+    const updatedOption = await option.save();
+    res.json(updatedOption);
+  } else {
+    res.status(404);
+    throw new Error("Custom Option not found");
+  }
 });
 
 // @desc    Delete Custom Option
@@ -57,6 +77,6 @@ const deleteCustomOption = asyncHandler(async (req, res) => {
 export {
   createCustomOption,
   getCustomOptions,
+  updateCustomOption, // Exportada
   deleteCustomOption,
-  // Later: getCustomOptionById, updateCustomOption
 };

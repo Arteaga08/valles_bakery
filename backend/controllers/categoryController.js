@@ -37,8 +37,48 @@ const getCategories = asyncHandler(async (req, res) => {
   res.status(200).json(categories);
 });
 
-export {
-  createCategory,
-  getCategories,
-  // Later: updateCategory, deleteCategory
-};
+// @desc    Update category
+// @route   PUT /api/categories/:id
+// @access  Private/Admin
+const updateCategory = asyncHandler(async (req, res) => {
+  const { name, description } = req.body; // No necesitamos recibir el slug del body si lo generamos nosotros
+
+  const category = await Category.findById(req.params.id);
+
+  if (category) {
+    category.name = name || category.name;
+    category.description = description || category.description;
+
+    // LÓGICA DE ACTUALIZACIÓN DE SLUG
+    if (name) {
+      category.slug = name
+        .toLowerCase()
+        .trim()
+        .replace(/[^\w\s-]/g, "") // Elimina caracteres especiales
+        .replace(/[\s_-]+/g, "-") // Reemplaza espacios y guiones bajos por un solo guion
+        .replace(/^-+|-+$/g, ""); // Quita guiones al inicio o final
+    }
+
+    const updatedCategory = await category.save();
+    res.json(updatedCategory);
+  } else {
+    res.status(404);
+    throw new Error("Categoría no encontrada");
+  }
+});
+
+// @desc    Delete category
+// @route   DELETE /api/categories/:id
+// @access  Private/Admin
+const deleteCategory = asyncHandler(async (req, res) => {
+  const category = await Category.findById(req.params.id);
+  if (category) {
+    await category.deleteOne();
+    res.json({ message: "Category removed" });
+  } else {
+    res.status(404);
+    throw new Error("Category not found");
+  }
+});
+
+export { createCategory, getCategories, updateCategory, deleteCategory };

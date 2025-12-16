@@ -2,6 +2,22 @@
 
 import mongoose from "mongoose";
 
+const imageSchema = mongoose.Schema(
+  {
+    url: { type: String, required: true },
+    isMain: { type: Boolean, default: false },
+  },
+  { _id: false } 
+);
+
+const sizeSchema = mongoose.Schema(
+  {
+    name: { type: String, required: true },
+    priceAdjustment: { type: Number, required: true, default: 0 },
+  },
+  { _id: false } 
+);
+
 const ProductSchema = mongoose.Schema(
   {
     name: {
@@ -37,11 +53,11 @@ const ProductSchema = mongoose.Schema(
       default: false,
     },
     images: {
-      type: [String],
+      type: [imageSchema],
       required: true,
     },
     sizes: {
-      type: [String],
+      type: [sizeSchema],
       required: true,
     },
     preparationTimeMin: {

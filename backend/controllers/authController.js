@@ -1,3 +1,5 @@
+// /backend/controllers/authController.js
+
 import AdminUser from "../models/AdminUser.js";
 import asyncHandler from "express-async-handler";
 import jwt from "jsonwebtoken";

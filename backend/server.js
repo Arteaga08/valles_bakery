@@ -3,6 +3,8 @@ import dotenv from "dotenv";
 import cors from "cors";
 import connectDB from "./config/db.js";
 
+import chalk from "chalk";
+
 import categoryRoutes from "./routes/categoryRoutes.js";
 import productRoutes from "./routes/productRoutes.js";
 import customOptionRoute from "./routes/customOptionRoutes.js";
@@ -25,11 +27,12 @@ const app = express();
 app.use(cors());
 app.use(express.json()); // Body parser for raw JSON data
 
-// --- Use API Routes ---
+//Rutas de autemticación 
+app.use("/api/auth", authRoutes);
+// --- Use API Routes Protect ---
 app.use("/api/categories", categoryRoutes);
 app.use("/api/products", productRoutes);
 app.use("/api/custom-options", customOptionRoute);
-app.use("/api/auth", authRoutes);
 app.use("/api/orders", orderRoutes);
 
 // Manejo de Errores (Se añadirán más adelante)
@@ -40,6 +43,8 @@ app.get("/", (req, res) => {
   res.send("Bakery API is running...");
 });
 
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 50002;
 
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+app.listen(PORT, () =>
+  console.log(chalk.yellow(`Server running on port ${PORT}`))
+);
