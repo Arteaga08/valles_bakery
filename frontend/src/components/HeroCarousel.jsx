@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import API from "../services/api";
+import API from "../service/api";
 
 const HeroCarousel = () => {
   const [slides, setSlides] = useState([]);
