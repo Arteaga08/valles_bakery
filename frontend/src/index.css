@@ -1,0 +1,21 @@
+@import "tailwindcss";
+
+@theme {
+  /* Tus colores personalizados */
+  --color-baby-pink: #e7c0bc;
+  --color-new-york-pink: #d97e8a;
+  --color-black-bean: #370808;
+  --color-white-soft: #fcf9f9;
+
+  /* Tu tipografía Fraunces */
+  --font-fraunces: "Fraunces", serif;
+}
+
+/* Aplicar estilos globales */
+@layer base {
+  body {
+    font-family: var(--font-fraunces);
+    background-color: var(--color-white-soft);
+    color: var(--color-black-bean);
+  }
+}
