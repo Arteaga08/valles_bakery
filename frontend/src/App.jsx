@@ -8,19 +8,17 @@ function App() {
       <div className="min-h-screen flex flex-col bg-white-soft">
         <Navbar />
 
-        {/* Eliminamos el padding automático aquí para que el Hero sea Full Width */}
         <main className="grow">
           <Routes>
             <Route path="/" element={<Home />} />
-            {/* Aquí irán las rutas de categorías y admin después */}
           </Routes>
         </main>
 
         <footer className="bg-black-bean text-white-soft py-10 px-6 text-center">
-          <p className="font-fraunces text-xl mb-2 text-baby-pink">
-            Valle's Bakery
+          <p className="font-fraunces text-2xl mb-2 text-new-york-pink">
+            Vallée Cupcakes
           </p>
-          <p className="text-sm opacity-80">
+          <p className="text-sm opacity-60 tracking-widest uppercase">
             © 2025 - Tradición en cada bocado
           </p>
         </footer>

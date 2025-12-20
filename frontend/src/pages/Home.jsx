@@ -3,6 +3,7 @@ import HeroCarousel from "../components/HeroCarousel";
 import FavoritesWheel from "../components/FavoritesWheel";
 import CategoriesGrid from "../components/CategoriesGrid";
 import ShippingInfo from "../components/ShippingInfo";
+import MostSoldProducts from "../components/MostSoldProducts";
 import API from "../service/api";
 
 const Home = () => {
@@ -44,10 +45,11 @@ const Home = () => {
 
   return (
     <div className="flex flex-col w-full bg-white-soft">
-      {/* SECCIÓN 1: CARRUSEL HERO (IMÁGENES DE CLOUDINARY) */}
       <HeroCarousel />
+      {/* SECCIÓN 2: Productos mas vendidos */}
+      <MostSoldProducts />
 
-      {/* SECCIÓN 2: NUESTROS FAVORITOS (EFECTO 3D) */}
+      {/* SECCIÓN 3: NUESTROS FAVORITOS (EFECTO 3D) */}
       <FavoritesWheel products={products} />
 
       {/* SECCIÓN 3: EXPLORA CATEGORÍAS (GRID EDITORIAL) */}
