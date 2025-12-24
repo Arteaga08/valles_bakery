@@ -1,54 +1,68 @@
-// /backend/controllers/productController.js
-
 import Product from "../models/Product.js";
 import asyncHandler from "express-async-handler";
 
-// @desc    Create a new Product
-// @route   POST /api/products
-// @access  Private (Admin only)
+const handleUpload = async (files) => {
+  const uploadedUrls = [];
+
+  for (const file of files) {
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("upload_preset", "tu_preset"); // Configura esto en Cloudinary
+
+    const res = await fetch(
+      "https://api.cloudinary.com/v1_1/tu_user/image/upload",
+      {
+        method: "POST",
+        body: formData,
+      }
+    );
+    const data = await res.json();
+    uploadedUrls.push(data.secure_url);
+  }
+
+  return uploadedUrls; // Esto devuelve el arreglo [url1, url2] que espera tu backend
+};
+// ==============================
+// CREATE
+// ==============================
 const createProduct = asyncHandler(async (req, res) => {
   const {
     name,
     slug,
     shortDescription,
+    longDescription,
     price,
     category,
     images,
     sizes,
+    tags,
+    isBestSeller,
     preparationTimeMin,
     isCustomizable,
   } = req.body;
 
-  if (
-    !name ||
-    !slug ||
-    !category ||
-    !images ||
-    images.length === 0 ||
-    !sizes ||
-    sizes.length === 0
-  ) {
+  if (!name || !slug || !category || !images?.length || !sizes?.length) {
     res.status(400);
-    throw new Error(
-      "Please fill all required fields: name, slug, category, images, and sizes."
-    );
+    throw new Error("Missing required fields");
   }
 
-  const productExists = await Product.findOne({ slug });
-
-  if (productExists) {
+  const exists = await Product.findOne({ slug });
+  if (exists) {
     res.status(400);
-    throw new Error("A product with this slug already exists.");
+    throw new Error("Product with this slug already exists");
   }
 
   const product = await Product.create({
     name,
     slug,
     shortDescription,
+    longDescription,
     price,
     category,
     images,
     sizes,
+    tags,
+    isBestSeller,
     preparationTimeMin,
     isCustomizable,
   });
@@ -56,107 +70,94 @@ const createProduct = asyncHandler(async (req, res) => {
   res.status(201).json(product);
 });
 
-// @desc    Get all Products
-// @route   GET /api/products
-// @access  Public
+// ==============================
+// GET ALL
+// ==============================
 const getProducts = asyncHandler(async (req, res) => {
   const products = await Product.find({ isActive: true }).populate(
     "category",
     "name slug"
   );
-  res.status(200).json(products);
+  res.json(products);
 });
 
-// @desc    Get Product by ID (for single product page)
-// @route   GET /api/products/:id
-// @access  Public
+// ==============================
+// BEST SELLERS (HOME)
+// ==============================
+const getBestSellers = asyncHandler(async (req, res) => {
+  const products = await Product.find({
+    isActive: true,
+    isBestSeller: true,
+  })
+    .limit(12)
+    .populate("category", "name slug");
+
+  res.json(products);
+});
+
+// ==============================
+// GET ONE
+// ==============================
 const getProductById = asyncHandler(async (req, res) => {
   const product = await Product.findById(req.params.id).populate(
     "category",
-    "name"
+    "name slug"
   );
 
-  if (product) {
-    res.json(product);
-  } else {
+  if (!product) {
     res.status(404);
     throw new Error("Product not found");
   }
+
+  res.json(product);
 });
 
-// @desc    Delete Product
-// @route   DELETE /api/products/:id
-// @access  Private (Admin only)
+// ==============================
+// DELETE
+// ==============================
 const deleteProduct = asyncHandler(async (req, res) => {
   const product = await Product.findById(req.params.id);
 
-  if (product) {
-    await Product.deleteOne({ _id: product._id });
-    res.json({ message: "Product removed" });
-  } else {
+  if (!product) {
     res.status(404);
     throw new Error("Product not found");
   }
+
+  await product.deleteOne();
+  res.json({ message: "Product removed" });
 });
 
-// @desc    Update Product
-// @route   PUT /api/products/:id
-// @access  Private (Admin only)
+// ==============================
+// UPDATE
+// ==============================
 const updateProduct = asyncHandler(async (req, res) => {
-  const {
-    name,
-    shortDescription,
-    longDescription,
-    price,
-    category,
-    images,
-    sizes,
-    preparationTimeMin,
-    isCustomizable,
-    isActive,
-  } = req.body;
-
   const product = await Product.findById(req.params.id);
 
-  if (product) {
-    // 1. Actualización de campos básicos
-    product.shortDescription = shortDescription || product.shortDescription;
-    product.longDescription = longDescription || product.longDescription;
-    product.price = price !== undefined ? price : product.price;
-    product.category = category || product.category;
-    product.images = images || product.images;
-    product.sizes = sizes || product.sizes;
-    product.preparationTimeMin =
-      preparationTimeMin || product.preparationTimeMin;
-    product.isCustomizable =
-      isCustomizable !== undefined ? isCustomizable : product.isCustomizable;
-    product.isActive = isActive !== undefined ? isActive : product.isActive;
-
-    // 2. Lógica de Nombre y Slug Automático
-    if (name) {
-      product.name = name;
-      // Generamos un slug limpio: minúsculas, sin acentos ni caracteres especiales
-      product.slug = name
-        .toLowerCase()
-        .trim()
-        .normalize("NFD") // Separa acentos de las letras
-        .replace(/[\u0300-\u036f]/g, "") // Elimina los acentos
-        .replace(/[^\w\s-]/g, "") // Elimina todo lo que no sea letra, espacio o guion
-        .replace(/[\s_-]+/g, "-") // Reemplaza espacios por un solo guion
-        .replace(/^-+|-+$/g, ""); // Quita guiones al principio o final
-    }
-
-    const updatedProduct = await product.save();
-    res.json(updatedProduct);
-  } else {
+  if (!product) {
     res.status(404);
     throw new Error("Product not found");
   }
+
+  Object.assign(product, req.body);
+
+  if (req.body.name) {
+    product.slug = req.body.name
+      .toLowerCase()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .replace(/[^\w\s-]/g, "")
+      .replace(/\s+/g, "-");
+  }
+
+  const updated = await product.save();
+  res.json(updated);
 });
 
 export {
+  handleUpload,
   createProduct,
   getProducts,
+  getBestSellers,
   getProductById,
   deleteProduct,
   updateProduct,

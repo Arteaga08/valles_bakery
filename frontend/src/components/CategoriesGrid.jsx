@@ -1,7 +1,11 @@
 import { useState, useEffect } from "react";
-import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
+import { Swiper, SwiperSlide } from "swiper/react";
+import { Scrollbar } from "swiper/modules";
 import API from "../service/api";
+
+import "swiper/css";
+import "swiper/css/scrollbar";
 
 const CategoriesGrid = () => {
   const [categories, setCategories] = useState([]);
@@ -21,54 +25,101 @@ const CategoriesGrid = () => {
     fetchCategories();
   }, []);
 
-  if (loading)
-    return (
-      <div className="h-96 flex items-center justify-center font-fraunces text-new-york-pink text-2xl animate-pulse">
-        Cargando delicias...
-      </div>
-    );
+  const placeholders = [
+    "https://images.unsplash.com/photo-1571115177098-24ec42ed204d?q=80&w=800&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1558301211-0d8c8ddee6ec?q=80&w=800&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1558961363-fa8fdf82db35?q=80&w=800&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1606313564200-e75d5e30476c?q=80&w=800&auto=format&fit=crop",
+  ];
+
+  if (loading) return null;
 
   return (
-    <section className="py-20 px-6 bg-white">
-      <div className="max-w-7xl mx-auto">
-        <h2 className="text-4xl font-bold text-black-bean font-fraunces mb-10 border-l-8 border-new-york-pink pl-6">
-          Explora por <span className="text-new-york-pink">Categoría</span>
-        </h2>
+    <section className="py-24 px-6 bg-new-york-pink overflow-hidden">
+      <div className="max-w-350 mx-auto text-center">
+        <div className="mb-14">
+          <h2 className="text-5xl md:text-6xl font-serif text-[#1F412E] mb-4">
+            Categorías
+          </h2>
+          <p className="text-lg text-[#1F412E] font-medium opacity-90 max-w-2xl mx-auto">
+            Para cualquier día festivo, ocasión especial o motivo de
+            celebración.
+          </p>
+        </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 auto-rows-[250px]">
-          {categories.map((cat, index) => (
-            <motion.div
-              key={cat._id}
-              whileHover={{ scale: 1.02 }}
-              // Hacemos que la primera y la cuarta categoría sean más grandes (estilo mosaico)
-              className={`relative overflow-hidden rounded-3xl shadow-lg group ${
-                index === 0
-                  ? "md:col-span-2 md:row-span-2"
-                  : index === 3
-                  ? "md:col-span-2"
-                  : ""
-              }`}
-            >
+        {/* Añadimos una clase única 'categories-swiper' para no romper 
+          los estilos de la sección anterior 
+        */}
+        <Swiper
+          modules={[Scrollbar]}
+          spaceBetween={20}
+          slidesPerView={1.2}
+          centeredSlides={true}
+          slidesPerGroup={1}
+          grabCursor={true}
+          scrollbar={{ draggable: true, hide: false }}
+          breakpoints={{
+            1024: {
+              slidesPerView: 4,
+              spaceBetween: 40,
+              centeredSlides: false,
+              allowTouchMove: false,
+            },
+          }}
+          className="categories-swiper pb-24!"
+        >
+          {categories.slice(0, 4).map((cat, index) => (
+            <SwiperSlide key={cat._id}>
               <Link
                 to={`/productos?categoria=${
                   cat.slug || cat.name.toLowerCase()
                 }`}
+                className="group flex flex-col items-center w-full"
               >
-                <img
-                  src={cat.imageUrl} // Esta URL vendrá de Cloudinary desde tu DB
-                  alt={cat.name}
-                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                />
-                <div className="absolute inset-0 bg-linear-to-t from-black-bean/80 via-transparent to-transparent flex items-end p-8">
-                  <h3 className="text-white-soft text-2xl font-bold font-fraunces">
-                    {cat.name}
-                  </h3>
+                <div className="relative w-full aspect-square overflow-hidden bg-white mb-6 rounded-sm">
+                  <img
+                    src={
+                      cat.imageUrl || placeholders[index % placeholders.length]
+                    }
+                    alt={cat.name}
+                    className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-110"
+                  />
                 </div>
+                <h3 className="text-2xl font-serif text-[#1F412E] group-hover:opacity-60 transition-opacity">
+                  {cat.name}
+                </h3>
               </Link>
-            </motion.div>
+            </SwiperSlide>
           ))}
-        </div>
+        </Swiper>
       </div>
+
+      <style jsx global>{`
+        /* ESTILOS COMPARTIDOS PARA TODAS LAS BARRAS ROSAS */
+        .swiper-scrollbar {
+          height: 4px !important;
+          background: rgba(0, 0, 0, 0.05) !important;
+          border-radius: 10px !important;
+        }
+
+        .swiper-scrollbar-drag {
+          background: #e64a85 !important;
+          border-radius: 10px !important;
+        }
+
+        /* AJUSTES ESPECÍFICOS PARA ESTA SECCIÓN DE CATEGORÍAS */
+        .categories-swiper .swiper-scrollbar {
+          width: 60% !important;
+          left: 20% !important;
+          bottom: 20px !important;
+        }
+
+        @media (min-width: 1024px) {
+          .categories-swiper .swiper-scrollbar {
+            display: none !important;
+          }
+        }
+      `}</style>
     </section>
   );
 };

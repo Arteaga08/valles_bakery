@@ -1,22 +1,28 @@
-// /backend/routes/productRoutes.js
-
 import express from "express";
 const router = express.Router();
+
 import {
   createProduct,
   getProducts,
+  getBestSellers,
   getProductById,
   deleteProduct,
   updateProduct,
 } from "../controllers/productController.js";
-import { protect, admin } from '../middleware/authMiddleware.js'; // Middleware de Auth
 
-router.route("/").get(getProducts).post(protect, admin, createProduct);
+import { protect, admin } from "../middleware/authMiddleware.js";
+
+// PUBLIC
+router.get("/", getProducts);
+router.get("/bestsellers", getBestSellers);
+router.get("/:id", getProductById);
+
+// ADMIN
+router.post("/", protect, admin, createProduct);
 
 router
   .route("/:id")
-  .get(getProductById)
-  .delete(protect, admin, deleteProduct)
-  .put(protect, admin, updateProduct); // <-- Ruta para actualizar
+  .put(protect, admin, updateProduct)
+  .delete(protect, admin, deleteProduct);
 
 export default router;

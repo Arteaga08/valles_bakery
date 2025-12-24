@@ -1,5 +1,3 @@
-// /backend/models/Product.js
-
 import mongoose from "mongoose";
 
 const imageSchema = mongoose.Schema(
@@ -7,7 +5,7 @@ const imageSchema = mongoose.Schema(
     url: { type: String, required: true },
     isMain: { type: Boolean, default: false },
   },
-  { _id: false } 
+  { _id: false }
 );
 
 const sizeSchema = mongoose.Schema(
@@ -15,14 +13,14 @@ const sizeSchema = mongoose.Schema(
     name: { type: String, required: true },
     priceAdjustment: { type: Number, required: true, default: 0 },
   },
-  { _id: false } 
+  { _id: false }
 );
 
 const ProductSchema = mongoose.Schema(
   {
     name: {
       type: String,
-      required: [true, "Please add a product name"],
+      required: true,
       trim: true,
     },
     slug: {
@@ -35,45 +33,57 @@ const ProductSchema = mongoose.Schema(
       type: String,
       required: true,
     },
-    longDescription: {
-      type: String,
-    },
+    longDescription: String,
+
     price: {
       type: Number,
       required: true,
-      default: 0.0,
+      default: 0,
     },
+
     category: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Category",
       required: true,
     },
-    isCustomizable: {
-      type: Boolean,
-      default: false,
-    },
+
     images: {
       type: [imageSchema],
       required: true,
     },
+
     sizes: {
       type: [sizeSchema],
       required: true,
     },
+
+    tags: {
+      type: [String],
+      default: [],
+    },
+
+    isBestSeller: {
+      type: Boolean,
+      default: false,
+    },
+
+    isCustomizable: {
+      type: Boolean,
+      default: false,
+    },
+
     preparationTimeMin: {
       type: Number,
       default: 24,
     },
+
     isActive: {
       type: Boolean,
       default: true,
     },
   },
-  {
-    timestamps: true,
-  }
+  { timestamps: true }
 );
 
 const Product = mongoose.model("Product", ProductSchema);
-
 export default Product;

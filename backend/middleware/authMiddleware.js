@@ -6,6 +6,7 @@ import AdminUser from "../models/AdminUser.js";
 
 // Middleware principal para verificar el token
 const protect = asyncHandler(async (req, res, next) => {
+  console.log("--- PETICIÓN RECIBIDA EN PROTECT ---");
   let token;
 
   // 1. Check for token in the 'Authorization' header
@@ -39,6 +40,7 @@ const protect = asyncHandler(async (req, res, next) => {
 
 // Middleware para verificar que el usuario sea Admin
 const admin = (req, res, next) => {
+  console.log("Usuario en el middleware:", req.user);
   // Assuming the user is attached via the 'protect' middleware
   if (req.user && req.user.role === "Admin") {
     next();

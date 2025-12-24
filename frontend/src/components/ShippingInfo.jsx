@@ -1,48 +1,121 @@
-import { Truck, ShieldCheck, Clock } from "lucide-react";
+import React from "react";
+import { Link } from "react-router-dom";
 
-const ShippingInfo = () => {
-  const features = [
+const DeliveryOptions = () => {
+  const options = [
     {
-      icon: <Truck size={32} />,
-      title: "Envío Local",
-      desc: "Entrega segura en toda la zona.",
+      title: "Entregas Locales",
+      image:
+        "https://images.unsplash.com/photo-1587314168485-3236d6710814?q=80&w=800&auto=format&fit=crop",
+      bgColor: "bg-[#FFF9C4]", // Amarillo pastel
+      patternColor: "#FDE68A",
     },
     {
-      icon: <Clock size={32} />,
-      title: "Pedidos Anticipados",
-      desc: "Mínimo 48 horas de antelación.",
+      title: "Ordena y Recoge en nuestro local",
+      image:
+        "https://images.unsplash.com/photo-1578985545062-69928b1d9587?q=80&w=800&auto=format&fit=crop",
+      bgColor: "bg-[#E3F2FD]", // Azul pastel
+      patternColor: "#BBDEFB",
     },
     {
-      icon: <ShieldCheck size={32} />,
-      title: "Calidad Garantizada",
-      desc: "Ingredientes premium siempre.",
+      title: "Bodas y Eventos",
+      image:
+        "https://images.unsplash.com/photo-1535141192574-5d4897c12636?q=80&w=800&auto=format&fit=crop",
+      bgColor: "bg-[#F3E5F5]", // Morado pastel
+      patternColor: "#E1BEE7",
     },
   ];
 
   return (
-    <section className="py-16 bg-baby-pink/20">
-      <div className="max-w-7xl mx-auto px-6">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
-          {features.map((f, i) => (
+    <section className="py-20 px-6 bg-white">
+      <div className="max-w-350 mx-auto text-center">
+        {/* Encabezado */}
+        <h2 className="text-5xl md:text-6xl font-serif text-[#1F412E] mb-4">
+          Envios y Pick Up
+        </h2>
+        <p className="text-lg text-[#1F412E] font-medium opacity-80 max-w-3xl mx-auto mb-10 leading-relaxed">
+          Te facilitamos conseguir lo mejor de Vallée Cupcakes, estés donde
+          estés. Pide ahora con envío, recoge en tu tienda local
+          o contacta con nuestro equipo para organizar un catering personalizado
+          para tu próximo evento.
+        </p>
+
+        {/* Grid de opciones */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-0">
+          {options.map((opt, index) => (
             <div
-              key={i}
-              className="flex flex-col items-center text-center group"
+              key={index}
+              className="flex flex-col items-center group cursor-pointer"
             >
-              <div className="mb-4 text-new-york-pink group-hover:scale-110 transition-transform">
-                {f.icon}
+              {/* Contenedor con patrón de diamantes */}
+              <div
+                className={`relative w-full aspect-square flex items-center justify-center overflow-hidden ${opt.bgColor}`}
+              >
+                <div
+                  className="absolute inset-0 opacity-40"
+                  style={{
+                    backgroundImage: `radial-gradient(${opt.patternColor} 20%, transparent 20%), radial-gradient(${opt.patternColor} 20%, transparent 20%)`,
+                    backgroundPosition: "0 0, 25px 25px",
+                    backgroundSize: "50px 50px",
+                  }}
+                ></div>
+
+                {/* Imagen con marco ondulado / festoneado */}
+                <div className="relative z-10 w-[80%] h-[80%] clip-festoneado-soft overflow-hidden bg-white shadow-sm">
+                  <img
+                    src={opt.image}
+                    alt={opt.title}
+                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                  />
+                </div>
               </div>
-              <h4 className="text-xl font-bold text-black-bean font-fraunces mb-2">
-                {f.title}
-              </h4>
-              <p className="text-cordovan/80 text-sm leading-relaxed">
-                {f.desc}
-              </p>
+
+              {/* Título de la opción */}
+              <h3 className="mt-6 text-xl font-medium text-[#1F412E] group-hover:underline underline-offset-4">
+                {opt.title}
+              </h3>
             </div>
           ))}
         </div>
       </div>
+
+      <style jsx>{`
+        .clip-festoneado-soft {
+          /* Clip path que imita la forma de nube/flor de la referencia */
+          clip-path: polygon(
+            50% 0%,
+            61% 2%,
+            72% 0%,
+            83% 5%,
+            91% 12%,
+            97% 22%,
+            100% 33%,
+            98% 44%,
+            100% 55%,
+            97% 66%,
+            92% 77%,
+            84% 86%,
+            74% 94%,
+            63% 98%,
+            52% 100%,
+            41% 98%,
+            30% 94%,
+            20% 88%,
+            11% 80%,
+            5% 70%,
+            1% 59%,
+            3% 48%,
+            0% 37%,
+            2% 26%,
+            8% 15%,
+            18% 7%,
+            29% 2%,
+            40% 0%
+          );
+        }
+      `}</style>
     </section>
   );
 };
 
-export default ShippingInfo;
+export default DeliveryOptions;
