@@ -1,6 +1,6 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import { Instagram, Facebook, Video } from "lucide-react"; // Usamos Video para TikTok o puedes usar los iconos personalizados
+import { Instagram, Facebook, Video, UserLock } from "lucide-react"; // Usamos Video para TikTok o puedes usar los iconos personalizados
 
 const Footer = () => {
   return (
@@ -69,6 +69,15 @@ const Footer = () => {
               <li>hola@valleecupcakes.com</li>
               <li>+52 (55) 1234-5678</li>
             </ul>
+            <Link
+              to="/admin/login"
+              className="flex items-center gap-2 text-[#1F412E] opacity-60 hover:opacity-100 hover:text-[#e64a85] transition-all"
+            >
+              <UserLock size={18} strokeWidth={1.5} />
+              <span className="text-[10px] uppercase tracking-widest font-bold">
+                Admin
+              </span>
+            </Link>
           </div>
 
           {/* Columna 4: Redes Sociales con Lucide */}

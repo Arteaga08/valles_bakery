@@ -194,24 +194,24 @@ const MostSoldProducts = () => {
           })}
         </Swiper>
         <style jsx global>{`
-          .swiper-scrollbar {
-            background: #f1f1f1 !important;
-            height: 4px !important;
-            bottom: 10px !important;
-            width: 80% !important;
-            left: 10% !important;
-            border-radius: 10px;
-          }
-          .swiper-scrollbar-drag {
-            background: #e64a85 !important;
-            border-radius: 10px;
-            transition: transform 0.9s cubic-bezier(0.25, 1, 0.5, 1) !important;
-          }
-          /* Estilo opcional para que la transición de imágenes sea más suave */
-          .group-hover\/card\:opacity-100 {
-            transition: opacity 0.7s ease-in-out;
-          }
-        `}</style>
+  .swiper-scrollbar {
+    background: #f1f1f1 !important;
+    height: 4px !important;
+    bottom: 10px !important;
+    width: 80% !important;
+    left: 10% !important;
+    border-radius: 10px;
+  }
+  .swiper-scrollbar-drag {
+    background: #e64a85 !important;
+    border-radius: 10px;
+    transition: transform 0.9s cubic-bezier(0.25, 1, 0.5, 1) !important;
+  }
+  /* Estilo opcional para que la transición de imágenes sea más suave */
+  .group-hover\/card\:opacity-100 {
+    transition: opacity 0.7s ease-in-out;
+  }
+`}</style>
       </div>
     </section>
   );
