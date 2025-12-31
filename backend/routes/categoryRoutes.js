@@ -3,6 +3,7 @@ const router = express.Router();
 import {
   createCategory,
   getCategories,
+  getCategoryById,
   updateCategory,
   deleteCategory,
 } from "../controllers/categoryController.js";
@@ -18,6 +19,7 @@ router
 
 router
   .route("/:id")
+  .get(getCategoryById)
   .put(protect, admin, updateCategory)
   .delete(protect, admin, deleteCategory);
 

@@ -72,10 +72,16 @@ const AdminProducts = () => {
           </p>
         </div>
         <button
-          onClick={() => navigate("/admin/productos/nuevo")}
-          className="flex items-center gap-2 bg-[#1F412E] ..."
+          onClick={() => navigate("nuevo")}
+          className="flex items-center gap-2 bg-[#1F412E] hover:bg-[#e64a85] text-white px-6 py-3 transition-all duration-300 shadow-sm group"
         >
-          <Plus size={16} /> Añadir Pastel
+          <Plus
+            size={16}
+            className="group-hover:rotate-90 transition-transform duration-300"
+          />
+          <span className="text-[10px] font-black uppercase tracking-[0.2em]">
+            Añadir Pastel
+          </span>
         </button>
       </div>
 

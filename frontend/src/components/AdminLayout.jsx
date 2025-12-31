@@ -2,18 +2,21 @@ import AdminSidebar from "../components/AdminSidebar";
 
 const AdminLayout = ({ children }) => {
   return (
-    <div className="min-h-screen bg-[#FAF7F2]">
+    <div className="block lg:flex min-h-screen bg-[#FAF7F2] w-full">
       <AdminSidebar />
 
-      {/* CONTENIDO */}
       <main
         className="
-        pt-16 lg:pt-0
-        lg:ml-72
-        px-6 py-8
-      "
+          flex-1
+          w-full
+          lg:ml-72 
+          pt-28 lg:pt-20
+          px-4 md:px-10
+          pb-20
+        "
       >
-        {children}
+        {/* Contenedor de seguridad para que nada se salga en pantallas pequeñas */}
+        <div className="w-full max-w-full overflow-hidden">{children}</div>
       </main>
     </div>
   );

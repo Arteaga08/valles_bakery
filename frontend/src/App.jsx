@@ -4,25 +4,29 @@ import Home from "./pages/Home";
 import Products from "./pages/Products";
 import Footer from "./components/Footer";
 
-// --- IMPORTS DE ADMINISTRACIÓN ---
+//  IMPORTS DE ADMINISTRACIÓN ---
 import AdminRoute from "./auth/AdminRoute";
 import AdminLogin from "./pages/AdminLogin";
 import AdminLayout from "./components/AdminLayout";
 import Agenda from "./pages/admin/Agenda";
+
+// GESTION DE PRODUCTOS
 import AdminProducts from "./pages/admin/AdminProducts";
 import AdminProductCreate from "./pages/admin/AdminProductCreate"; // Formulario Crear
 import AdminProductEdit from "./pages/admin/AdminProductEdit";// Formulario Editar
-import AdminCategories from "./pages/admin/AdminCategories";
+
 import AdminCustom from "./pages/admin/AdminCustom";
+
+// GESTION DE CATEGORIAS
+import AdminCategories from "./pages/admin/AdminCategories";
+import AdminCategoryCreate from "./pages/admin/AdminCategoryCreate";
+import AdminCategoryEdit from "./pages/admin/AdminCategoryEdit";
 
 function App() {
   return (
     <Router>
       <Routes>
-        {/* ===========================================================
-            1. RUTAS PÚBLICAS (Cliente)
-            Incluyen Navbar y Footer. El fondo es el crema de Vallée.
-            =========================================================== */}
+        {/* 1. RUTAS PÚBLICAS */}
         <Route
           path="/*"
           element={
@@ -40,34 +44,26 @@ function App() {
           }
         />
 
-        {/* ===========================================================
-            2. RUTAS PRIVADAS (Panel de Administración)
-            Protegidas por AdminRoute. Usan AdminLayout (Sidebar).
-            =========================================================== */}
+        {/* 2. RUTAS PRIVADAS (Panel de Administración) */}
         <Route element={<AdminRoute />}>
           <Route
             path="/admin/*"
             element={
               <AdminLayout>
                 <Routes>
-                  {/* Dashboard / Inicio Admin */}
                   <Route path="agenda" element={<Agenda />} />
 
-                  {/* Gestión de Productos Normales */}
+                  {/* Gestión de Productos */}
                   <Route path="productos" element={<AdminProducts />} />
-                  <Route
-                    path="productos/nuevo"
-                    element={<AdminProductCreate />}
-                  />
-                  <Route
-                    path="productos/editar/:id"
-                    element={<AdminProductEdit />}
-                  />
+                  <Route path="productos/nuevo" element={<AdminProductCreate />} />
+                  <Route path="productos/editar/:id" element={<AdminProductEdit />} />
 
-                  {/* Gestión de Categorías */}
+                  {/* Gestión de Categorías (Rutas Actualizadas) */}
                   <Route path="categorias" element={<AdminCategories />} />
+                  <Route path="categorias/nuevo" element={<AdminCategoryCreate />} />
+                  <Route path="categorias/editar/:id" element={<AdminCategoryEdit />} />
 
-                  {/* Gestión de Productos Custom (Personalizados) */}
+                  {/* Gestión de Productos Custom */}
                   <Route path="custom" element={<AdminCustom />} />
                 </Routes>
               </AdminLayout>

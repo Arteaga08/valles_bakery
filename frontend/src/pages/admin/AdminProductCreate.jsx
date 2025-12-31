@@ -9,6 +9,7 @@ import {
   Loader2,
   Plus,
   Trash2,
+  ChevronDown,
 } from "lucide-react";
 
 const AdminProductCreate = () => {
@@ -24,8 +25,7 @@ const AdminProductCreate = () => {
     price: 0,
     category: "",
     images: [],
-    sizes: [{ name: "Estándar", priceAdjustment: 0 }], // Requerido por tu schema
-    tags: [],
+    sizes: [],
     isBestSeller: false,
     preparationTimeMin: 24,
   });
@@ -44,7 +44,6 @@ const AdminProductCreate = () => {
     fetchCategories();
   }, []);
 
-  // Generar Slug automático basado en el nombre
   const handleNameChange = (e) => {
     const name = e.target.value;
     const slug = name
@@ -54,17 +53,11 @@ const AdminProductCreate = () => {
     setProduct({ ...product, name, slug });
   };
 
-  // Manejo de Tamaños (Sizes)
   const addSize = () => {
     setProduct({
       ...product,
       sizes: [...product.sizes, { name: "", priceAdjustment: 0 }],
     });
-  };
-
-  const removeSize = (index) => {
-    const newSizes = product.sizes.filter((_, i) => i !== index);
-    setProduct({ ...product, sizes: newSizes });
   };
 
   const handleSizeChange = (index, field, value) => {
@@ -80,16 +73,14 @@ const AdminProductCreate = () => {
 
     const formData = new FormData();
     formData.append("file", file);
-    formData.append("upload_preset", "vallee_preset"); // 👈 El nombre del preset Unsigned
-    formData.append("cloud_name", "dnppruwh4"); // 👈 Tu Cloud Name
+    formData.append("upload_preset", "vallee_preset");
+    formData.append("cloud_name", "dnppruwh4");
 
     try {
       const res = await axios.post(
-        "https://api.cloudinary.com/v1_1/dnppruwh4/image/upload", // 👈 Tu Cloud Name aquí también
+        "https://api.cloudinary.com/v1_1/dnppruwh4/image/upload",
         formData
       );
-
-      // Ajustamos al esquema { url, isMain } que pide tu modelo
       setProduct({
         ...product,
         images: [
@@ -98,48 +89,25 @@ const AdminProductCreate = () => {
         ],
       });
     } catch (err) {
-      console.error("Error detallado:", err.response?.data);
-      alert("Error al subir imagen a Cloudinary. Revisa la consola.");
+      alert("Error al subir imagen.");
     } finally {
       setLoading(false);
     }
   };
 
-  // Dentro de tu componente AdminProductCreate.jsx
-
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    // VALIDACIÓN LÓGICA DE IMÁGENES
-    if (product.images.length === 0) {
+    if (product.images.length === 0)
       return alert("Debes subir al menos una imagen.");
-    }
-    if (product.isBestSeller && product.images.length < 2) {
-      if (
-        !window.confirm(
-          "Los Best Sellers suelen verse mejor con 2 imágenes (efecto hover). ¿Deseas continuar con solo una?"
-        )
-      ) {
-        return;
-      }
-    }
 
     setLoading(true);
     try {
       const token = localStorage.getItem("adminToken");
       const config = { headers: { Authorization: `Bearer ${token}` } };
-
-      // LÓGICA DE TAMAÑOS:
-      // Si el Admin no agregó tamaños extras, enviamos el Estándar por defecto.
-      // Esto asegura que el campo 'sizes' (que es obligatorio en tu modelo) nunca vaya vacío.
       const finalProduct = {
         ...product,
-        sizes:
-          product.sizes.length > 0
-            ? product.sizes
-            : [{ name: "Estándar", priceAdjustment: 0 }],
+        sizes: [{ name: "Estándar", priceAdjustment: 0 }, ...product.sizes],
       };
-
       await axios.post(
         "http://localhost:5002/api/products",
         finalProduct,
@@ -147,67 +115,66 @@ const AdminProductCreate = () => {
       );
       navigate("/admin/productos");
     } catch (err) {
-      alert(err.response?.data?.message || "Error al crear producto");
+      alert("Error al crear producto");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="animate-fadeIn max-w-6xl mx-auto pb-20">
+    <div className="animate-fadeIn max-w-6xl mx-auto pb-20 px-4">
       <button
         onClick={() => navigate("/admin/productos")}
-        className="flex items-center gap-2 text-gray-400 hover:text-[#1F412E] text-[10px] font-black uppercase tracking-widest mb-6"
+        className="flex items-center gap-2 text-gray-400 hover:text-[#1F412E] text-[10px] font-black uppercase tracking-widest mb-10 transition-colors"
       >
-        <ArrowLeft size={14} /> Volver
+        <ArrowLeft size={14} /> Volver al Inventario
       </button>
 
       <form
         onSubmit={handleSubmit}
-        className="grid grid-cols-1 lg:grid-cols-3 gap-8"
+        className="grid grid-cols-1 lg:grid-cols-3 gap-12"
       >
-        {/* COLUMNA IZQUIERDA: Info Principal */}
-        <div className="lg:col-span-2 space-y-6 bg-white p-8 border border-gray-100">
-          <h2 className="font-serif text-2xl text-[#1F412E]">
-            Información del Producto
-          </h2>
+        {/* COLUMNA IZQUIERDA */}
+        <div className="lg:col-span-2 space-y-12">
+          <h2 className="font-serif text-4xl text-[#1F412E]">Nuevo Producto</h2>
 
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <label className="text-[10px] font-black uppercase text-gray-400">
+          {/* Bloque Nombre y Slug */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+            <div className="flex flex-col gap-1">
+              <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 h-4">
                 Nombre
               </label>
               <input
                 type="text"
                 required
-                className="w-full border-b p-2 outline-none focus:border-[#e64a85]"
+                className="w-full border-b border-gray-200 py-3 outline-none focus:border-[#e64a85] transition-all bg-transparent text-sm"
                 value={product.name}
                 onChange={handleNameChange}
               />
             </div>
-            <div className="space-y-2">
-              <label className="text-[10px] font-black uppercase text-gray-400">
+            <div className="flex flex-col gap-1">
+              <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 h-4">
                 Slug (URL)
               </label>
               <input
                 type="text"
                 readOnly
-                className="w-full border-b p-2 bg-gray-50 text-gray-400 outline-none"
+                className="w-full border-b border-gray-100 py-3 bg-transparent text-gray-300 outline-none italic text-sm cursor-not-allowed"
                 value={product.slug}
               />
             </div>
           </div>
 
-          <div className="grid grid-cols-3 gap-6 items-start">
-            {/* Precio Base */}
-            <div className="flex flex-col gap-2">
-              <label className="text-[10px] font-black uppercase text-gray-400 h-4">
+          {/* Bloque Técnico: EL QUE ESTABA DISPAREJO */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-10 items-end">
+            <div className="flex flex-col">
+              <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 h-10 flex items-end pb-1">
                 Precio Base ($)
               </label>
               <input
                 type="number"
                 required
-                className="w-full border-b border-gray-200 h-10 py-2 outline-none focus:border-[#e64a85] transition-colors bg-transparent"
+                className="w-full border-b border-gray-200 py-3 outline-none focus:border-[#e64a85] bg-transparent text-sm"
                 value={product.price}
                 onChange={(e) =>
                   setProduct({ ...product, price: e.target.value })
@@ -215,95 +182,102 @@ const AdminProductCreate = () => {
               />
             </div>
 
-            {/* Categoría */}
-            <div className="flex flex-col gap-2">
-              <label className="text-[10px] font-black uppercase text-gray-400 h-4">
+            <div className="flex flex-col">
+              <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 h-10 flex items-end pb-1">
                 Categoría
               </label>
-              <select
-                required
-                className="w-full border-b border-gray-200 h-10 py-2 outline-none bg-transparent focus:border-[#e64a85] transition-colors appearance-none cursor-pointer"
-                value={product.category}
-                onChange={(e) =>
-                  setProduct({ ...product, category: e.target.value })
-                }
-              >
-                <option value="">Seleccionar...</option>
-                {categories.map((c) => (
-                  <option key={c._id} value={c._id}>
-                    {c.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            {/* Tiempo de Anticipación */}
-            <div className="flex flex-col gap-2">
-              <label className="text-[10px] font-black uppercase text-gray-400 h-4 leading-tight">
-                Anticipación
-              </label>
-              <select
-                className="w-full border-b border-gray-200 h-10 py-2 outline-none bg-transparent focus:border-[#e64a85] transition-colors appearance-none cursor-pointer"
-                value={product.preparationTimeMin / 1440}
-                onChange={(e) =>
-                  setProduct({
-                    ...product,
-                    preparationTimeMin: e.target.value * 1440,
-                  })
-                }
-              >
-                <option value="0">Entrega</option>
-                <option value="1">1 Día</option>
-                <option value="2">2 Días</option>
-                <option value="3">3 Días</option>
-                <option value="7">1 Semana</option>
-              </select>
-            </div>
-          </div>
-
-          {/* Sección de Tags / Disponibilidad debajo de los checkboxes */}
-          <div className="bg-white p-6 border border-gray-100 space-y-4 mt-6">
-            <div className="flex flex-col gap-4">
-              <label className="flex items-center gap-3 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={product.isBestSeller}
+              <div className="relative">
+                <select
+                  required
+                  className="w-full border-b border-gray-200 py-3 outline-none bg-transparent text-sm appearance-none cursor-pointer focus:border-[#e64a85]"
+                  value={product.category}
                   onChange={(e) =>
-                    setProduct({ ...product, isBestSeller: e.target.checked })
+                    setProduct({ ...product, category: e.target.value })
                   }
-                  className="accent-[#e64a85]"
+                >
+                  <option value="">Seleccionar...</option>
+                  {categories.map((c) => (
+                    <option key={c._id} value={c._id}>
+                      {c.name}
+                    </option>
+                  ))}
+                </select>
+                <ChevronDown
+                  size={14}
+                  className="absolute right-0 bottom-3 text-gray-400 pointer-events-none"
                 />
-                <span className="text-[10px] font-black uppercase text-[#1F412E]">
-                  Destacar como BestSeller
-                </span>
-              </label>
+              </div>
+            </div>
 
-              <label className="flex items-center gap-3 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={product.preparationTimeMin === 0}
+            <div className="flex flex-col">
+              <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 h-10 flex items-end pb-1 leading-tight">
+                Tiempo de Anticipación
+              </label>
+              <div className="relative">
+                <select
+                  className="w-full border-b border-gray-200 py-3 outline-none bg-transparent text-sm appearance-none cursor-pointer focus:border-[#e64a85]"
+                  value={product.preparationTimeMin / 1440}
                   onChange={(e) =>
                     setProduct({
                       ...product,
-                      preparationTimeMin: e.target.checked ? 0 : 1440,
+                      preparationTimeMin: e.target.value * 1440,
                     })
                   }
-                  className="accent-[#e64a85]"
+                >
+                  <option value="0">Entrega Inmediata</option>
+                  <option value="1">1 Día</option>
+                  <option value="2">2 Días</option>
+                  <option value="3">3 Días</option>
+                </select>
+                <ChevronDown
+                  size={14}
+                  className="absolute right-0 bottom-3 text-gray-400 pointer-events-none"
                 />
-                <span className="text-[10px] font-black uppercase text-[#1F412E]">
-                  Disponible para entrega hoy mismo
-                </span>
-              </label>
+              </div>
             </div>
           </div>
 
-          <div className="space-y-2">
-            <label className="text-[10px] font-black uppercase text-gray-400">
+          {/* Checkboxes agrupados de forma limpia */}
+          <div className="bg-[#FAF7F2]/50 p-8 space-y-5 rounded-sm">
+            <label className="flex items-center gap-4 cursor-pointer group">
+              <input
+                type="checkbox"
+                checked={product.isBestSeller}
+                onChange={(e) =>
+                  setProduct({ ...product, isBestSeller: e.target.checked })
+                }
+                className="w-4 h-4 accent-[#e64a85] rounded-none"
+              />
+              <span className="text-[10px] font-black uppercase text-[#1F412E] tracking-widest">
+                Destacar como Best Seller
+              </span>
+            </label>
+            <label className="flex items-center gap-4 cursor-pointer group">
+              <input
+                type="checkbox"
+                checked={product.preparationTimeMin === 0}
+                onChange={(e) =>
+                  setProduct({
+                    ...product,
+                    preparationTimeMin: e.target.checked ? 0 : 1440,
+                  })
+                }
+                className="w-4 h-4 accent-[#1F412E] rounded-none"
+              />
+              <span className="text-[10px] font-black uppercase text-[#1F412E] tracking-widest">
+                Disponible para entrega hoy mismo
+              </span>
+            </label>
+          </div>
+
+          {/* Descripción */}
+          <div className="flex flex-col gap-4">
+            <label className="text-[10px] font-black uppercase tracking-widest text-gray-400">
               Descripción Corta
             </label>
             <textarea
               required
-              className="w-full border p-3 h-20 outline-none focus:border-[#e64a85]"
+              className="w-full border border-gray-100 p-5 h-28 outline-none focus:border-[#e64a85] text-sm resize-none transition-all bg-white"
               value={product.shortDescription}
               onChange={(e) =>
                 setProduct({ ...product, shortDescription: e.target.value })
@@ -311,68 +285,62 @@ const AdminProductCreate = () => {
             />
           </div>
 
-          {/* SECCIÓN DE TAMAÑOS (SIZES) */}
-          <div className="space-y-4 pt-6 border-t border-gray-100">
-            <div className="flex justify-between items-center">
-              <div>
-                <h4 className="text-[10px] font-black uppercase text-[#1F412E]">
-                  Configuración de Tamaños
-                </h4>
-                <p className="text-[9px] text-gray-400">
-                  El tamaño estándar usa el precio base definido arriba.
-                </p>
-              </div>
+          {/* Tamaños Disponibles */}
+          <div className="space-y-8 pt-6">
+            <div className="flex justify-between items-end border-b border-gray-100 pb-3">
+              <h4 className="text-[10px] font-black uppercase tracking-widest text-[#1F412E]">
+                Tamaños Disponibles
+              </h4>
               <button
                 type="button"
                 onClick={addSize}
-                className="text-[#e64a85] flex items-center gap-1 text-[10px] font-bold hover:underline"
+                className="text-[#e64a85] flex items-center gap-2 text-[10px] font-black uppercase hover:opacity-60 transition-all"
               >
-                <Plus size={12} /> AÑADIR OTRO TAMAÑO
+                <Plus size={14} /> Añadir Tamaño
               </button>
             </div>
 
-            <div className="space-y-3">
-              {/* FILA ESTÁNDAR: Automática y Bloqueada */}
-              <div className="flex gap-4 items-center bg-gray-50/50 p-2 rounded border border-dashed border-gray-200">
+            <div className="space-y-4">
+              {/* Tamaño Estándar Nivelado */}
+              <div className="flex gap-8 items-end pb-2">
                 <div className="flex-1">
                   <input
                     readOnly
-                    value="Estándar (Precio Base)"
-                    className="w-full bg-transparent py-1 text-sm outline-none text-gray-400 italic"
+                    value="Estándar"
+                    className="w-full border-b border-gray-100 py-3 text-sm text-gray-400 outline-none bg-transparent"
                   />
                 </div>
-                <div className="flex items-center gap-2">
-                  <span className="text-[10px] text-gray-400">$</span>
+                <div className="w-32">
                   <input
                     readOnly
                     value={product.price || 0}
-                    className="w-20 bg-transparent py-1 text-sm outline-none font-bold text-[#1F412E]"
+                    className="w-full border-b border-gray-100 py-3 text-sm text-gray-400 outline-none bg-transparent text-right"
                   />
                 </div>
-                <div className="w-8"></div>{" "}
-                {/* Espacio para alinear con el icono de basura */}
+                <div className="w-5"></div>
               </div>
 
-              {/* VARIACIONES ADICIONALES */}
+              {/* Dinámicos Nivelados */}
               {product.sizes.map((size, index) => (
                 <div
                   key={index}
-                  className="flex gap-4 items-center bg-white p-2 rounded border border-gray-100 animate-fadeIn shadow-sm"
+                  className="flex gap-8 items-end animate-fadeIn pb-2"
                 >
-                  <input
-                    placeholder="Nombre (ej: Grande / 20 personas)"
-                    className="flex-1 bg-transparent border-b border-gray-200 py-1 text-sm outline-none focus:border-[#e64a85]"
-                    value={size.name}
-                    onChange={(e) =>
-                      handleSizeChange(index, "name", e.target.value)
-                    }
-                  />
-                  <div className="flex items-center gap-2">
-                    <span className="text-[10px] text-gray-500">+$</span>
+                  <div className="flex-1">
+                    <input
+                      placeholder="Nombre del tamaño"
+                      className="w-full border-b border-gray-200 py-3 text-sm outline-none focus:border-[#e64a85] bg-transparent"
+                      value={size.name}
+                      onChange={(e) =>
+                        handleSizeChange(index, "name", e.target.value)
+                      }
+                    />
+                  </div>
+                  <div className="w-32 flex items-center gap-2 border-b border-gray-200">
+                    <span className="text-[10px] text-gray-300">+$</span>
                     <input
                       type="number"
-                      placeholder="Extra"
-                      className="w-20 bg-transparent border-b border-gray-200 py-1 text-sm outline-none focus:border-[#e64a85]"
+                      className="w-full py-3 text-sm outline-none bg-transparent text-right"
                       value={size.priceAdjustment}
                       onChange={(e) =>
                         handleSizeChange(
@@ -385,10 +353,15 @@ const AdminProductCreate = () => {
                   </div>
                   <button
                     type="button"
-                    onClick={() => removeSize(index)}
-                    className="text-gray-300 hover:text-red-500 transition-colors"
+                    onClick={() =>
+                      setProduct({
+                        ...product,
+                        sizes: product.sizes.filter((_, i) => i !== index),
+                      })
+                    }
+                    className="text-gray-300 hover:text-red-500 mb-3 transition-colors"
                   >
-                    <Trash2 size={14} />
+                    <Trash2 size={16} />
                   </button>
                 </div>
               ))}
@@ -396,26 +369,27 @@ const AdminProductCreate = () => {
           </div>
         </div>
 
-        {/* COLUMNA DERECHA: Imágenes y Acciones */}
-        <div className="space-y-6">
-          <div className="bg-white p-6 border border-gray-100">
-            <label className="block text-[10px] font-black uppercase text-gray-400 mb-4">
-              Galería de Imágenes
+        {/* COLUMNA DERECHA */}
+        <div className="space-y-10">
+          <div className="bg-white p-8 border border-gray-100 shadow-sm">
+            <label className="block text-[10px] font-black uppercase tracking-widest text-gray-400 mb-8">
+              Galería
             </label>
-            <div className="grid grid-cols-2 gap-2">
+            <div className="grid grid-cols-2 gap-4">
               {product.images.map((img, i) => (
-                <div key={i} className="relative aspect-square group">
+                <div
+                  key={i}
+                  className="relative aspect-square group overflow-hidden bg-gray-50 border border-gray-100"
+                >
                   <img
                     src={img.url}
-                    className={`w-full h-full object-cover rounded shadow-sm ${
-                      img.isMain ? "ring-2 ring-[#e64a85]" : ""
+                    className={`w-full h-full object-cover transition-transform duration-700 group-hover:scale-110 ${
+                      img.isMain ? "opacity-100" : "opacity-80"
                     }`}
                     alt="cake"
                   />
                   {img.isMain && (
-                    <span className="absolute top-1 left-1 bg-[#e64a85] text-white text-[8px] px-1 font-bold">
-                      PRINCIPAL
-                    </span>
+                    <div className="absolute top-0 left-0 w-full h-1 bg-[#e64a85]"></div>
                   )}
                   <button
                     type="button"
@@ -425,16 +399,19 @@ const AdminProductCreate = () => {
                         images: product.images.filter((_, idx) => idx !== i),
                       })
                     }
-                    className="absolute -top-1 -right-1 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                    className="absolute top-2 right-2 bg-white text-red-500 rounded-full p-1.5 shadow-sm opacity-0 group-hover:opacity-100 transition-opacity"
                   >
-                    <X size={10} />
+                    <X size={12} />
                   </button>
                 </div>
               ))}
-              <label className="aspect-square border-2 border-dashed border-gray-100 flex flex-col items-center justify-center cursor-pointer hover:bg-gray-50 transition-colors">
-                <Upload size={20} className="text-gray-300" />
-                <span className="text-[8px] font-bold text-gray-400 mt-2">
-                  SUBIR
+              <label className="aspect-square border-2 border-dashed border-gray-100 flex flex-col items-center justify-center cursor-pointer hover:bg-gray-50 transition-all group">
+                <Upload
+                  size={20}
+                  className="text-gray-300 group-hover:text-[#e64a85] transition-colors"
+                />
+                <span className="text-[7px] font-black text-gray-400 mt-3 tracking-[0.2em]">
+                  AÑADIR
                 </span>
                 <input
                   type="file"
@@ -445,31 +422,15 @@ const AdminProductCreate = () => {
             </div>
           </div>
 
-          <div className="bg-white p-6 border border-gray-100 space-y-4">
-            <label className="flex items-center gap-3 cursor-pointer">
-              <input
-                type="checkbox"
-                checked={product.isBestSeller}
-                onChange={(e) =>
-                  setProduct({ ...product, isBestSeller: e.target.checked })
-                }
-                className="accent-[#e64a85]"
-              />
-              <span className="text-[10px] font-black uppercase text-[#1F412E]">
-                Destacar como Best Seller
-              </span>
-            </label>
-          </div>
-
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-[#1F412E] text-white py-5 font-black text-[10px] uppercase tracking-[0.3em] hover:bg-[#e64a85] transition-all flex justify-center items-center gap-2 shadow-xl shadow-gray-200"
+            className="w-full bg-[#1F412E] hover:bg-[#e64a85] text-white py-6 font-black text-[11px] uppercase tracking-[0.4em] transition-all flex justify-center items-center gap-3 shadow-xl"
           >
             {loading ? (
-              <Loader2 className="animate-spin" size={16} />
+              <Loader2 className="animate-spin" size={18} />
             ) : (
-              <Save size={16} />
+              <Save size={18} />
             )}
             Publicar Pastel
           </button>

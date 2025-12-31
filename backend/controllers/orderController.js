@@ -10,22 +10,28 @@ const createOrder = asyncHandler(async (req, res) => {
   const {
     items,
     totalPrice,
+    amountPaid,
     customerName,
     customerPhone,
     deliveryDate,
+    deliveryTime, // <-- Agregar
+    deliveryMethod, // <-- Agregar
+    deliveryAddress,
     paymentMethod,
+    adminNotes,
   } = req.body;
 
   if (
     !items ||
     items.length === 0 ||
     !totalPrice ||
-    !deliveryDate ||
+    !customerName ||
     !customerPhone ||
-    !paymentMethod
+    !deliveryDate ||
+    !deliveryTime
   ) {
     res.status(400);
-    throw new Error("Missing required order fields.");
+    throw new Error("Faltan campos obligatorios para crear el pedido.");
   }
 
   // Validaciones adicionales (ej: verificar que deliveryDate sea futuro y disponible)
@@ -34,11 +40,15 @@ const createOrder = asyncHandler(async (req, res) => {
   const order = await Order.create({
     items,
     totalPrice,
+    amountPaid,
     customerName,
     customerPhone,
     deliveryDate,
+    deliveryTime,
+    deliveryMethod,
+    deliveryAddress,
     paymentMethod,
-    // status defaults to 'Pending Payment'
+    adminNotes,
   });
 
   res.status(201).json(order);

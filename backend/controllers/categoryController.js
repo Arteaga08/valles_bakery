@@ -81,4 +81,18 @@ const deleteCategory = asyncHandler(async (req, res) => {
   }
 });
 
-export { createCategory, getCategories, updateCategory, deleteCategory };
+// @desc    Get single category by ID
+// @route   GET /api/categories/:id
+// @access  Public (o Private si prefieres)
+const getCategoryById = asyncHandler(async (req, res) => {
+  const category = await Category.findById(req.params.id);
+
+  if (category) {
+    res.status(200).json(category);
+  } else {
+    res.status(404);
+    throw new Error("Categoría no encontrada");
+  }
+});
+
+export { createCategory, getCategories, updateCategory, deleteCategory, getCategoryById };

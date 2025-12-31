@@ -33,21 +33,32 @@ const OrderItemSchema = mongoose.Schema({
 // --- 3. Main Order Schema ---
 const OrderSchema = mongoose.Schema(
   {
-    items: [OrderItemSchema], // Array de los productos/pasteles comprados
+    items: [OrderItemSchema],
     totalPrice: {
       type: Number,
       required: true,
       default: 0.0,
     },
-    // Referencia opcional al usuario (si implementamos registro de cliente en el futuro)
-    // user: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
-
+    amountPaid: { type: Number, default: 0.0 },
     customerName: { type: String, required: true },
     customerPhone: { type: String, required: true }, // Para WhatsApp
 
     deliveryDate: {
       type: Date,
-      required: [true, "Please provide a delivery date"], // Clave para la Agenda
+      required: [true, "Please provide a delivery date"],
+    },
+    // --- AGREGAR ESTAS LÍNEAS ---
+    deliveryTime: {
+      type: String,
+      required: [true, "Please provide a delivery time"],
+    },
+    deliveryMethod: {
+      type: String,
+      enum: ["Pickup", "Delivery"],
+      default: "Pickup",
+    },
+    deliveryAddress: {
+      type: String,
     },
 
     status: {

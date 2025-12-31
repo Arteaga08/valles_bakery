@@ -8,7 +8,7 @@ import {
 import { protect, admin } from "../middleware/authMiddleware.js";
 
 // Rutas de cliente (Public access)
-router.route("/").post(createOrder);
+router.route("/").post(protect, admin, createOrder);
 
 // Rutas de administración (Private access)
 router.route("/admin").get(protect, admin, getAdminOrders);

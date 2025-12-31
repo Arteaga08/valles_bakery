@@ -239,6 +239,29 @@ const AdminProductEdit = () => {
               </select>
             </div>
           </div>
+          <div className="flex flex-col gap-2 pt-4">
+            <label className="text-[10px] font-black uppercase text-gray-400 tracking-widest">
+              Descripción Corta (Vista previa)
+            </label>
+            <textarea
+              rows="2"
+              placeholder="Ej: Un suave bizcocho de vainilla con capas de fresas frescas..."
+              className="w-full border-b py-2 outline-none focus:border-[#e64a85] bg-transparent resize-none text-sm font-light italic text-[#1F412E]"
+              value={product.shortDescription}
+              onChange={(e) =>
+                setProduct({ ...product, shortDescription: e.target.value })
+              }
+              maxLength={120}
+            />
+            <div className="flex justify-between items-center mt-1">
+              <p className="text-[9px] text-gray-400">
+                * Este texto aparecerá en las tarjetas de la tienda.
+              </p>
+              <span className="text-[9px] text-gray-300 font-bold">
+                {product.shortDescription?.length || 0}/120
+              </span>
+            </div>
+          </div>
 
           {/* TAMAÑOS (Igual que en Create) */}
           <div className="space-y-4 pt-6 border-t border-gray-100">
@@ -371,7 +394,7 @@ const AdminProductEdit = () => {
                 className="accent-[#e64a85]"
               />
               <span className="text-[10px] font-black uppercase text-[#1F412E]">
-                Best Seller (Hover effect)
+                BestSeller
               </span>
             </label>
           </div>
