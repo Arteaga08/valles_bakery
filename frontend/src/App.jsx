@@ -2,6 +2,7 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Navbar from "./components/Navbar";
 import Home from "./pages/Home";
 import Products from "./pages/Products";
+import ProductDetail from "./pages/ProductDetail";
 import Footer from "./components/Footer";
 
 //  IMPORTS DE ADMINISTRACIÓN ---
@@ -13,7 +14,7 @@ import Agenda from "./pages/admin/Agenda";
 // GESTION DE PRODUCTOS
 import AdminProducts from "./pages/admin/AdminProducts";
 import AdminProductCreate from "./pages/admin/AdminProductCreate"; // Formulario Crear
-import AdminProductEdit from "./pages/admin/AdminProductEdit";// Formulario Editar
+import AdminProductEdit from "./pages/admin/AdminProductEdit"; // Formulario Editar
 
 import AdminCustom from "./pages/admin/AdminCustom";
 
@@ -36,6 +37,7 @@ function App() {
                 <Routes>
                   <Route path="/" element={<Home />} />
                   <Route path="/productos" element={<Products />} />
+                  <Route path="/productos/:slug" element={<ProductDetail />} />
                   <Route path="/login" element={<AdminLogin />} />
                 </Routes>
               </main>
@@ -55,13 +57,25 @@ function App() {
 
                   {/* Gestión de Productos */}
                   <Route path="productos" element={<AdminProducts />} />
-                  <Route path="productos/nuevo" element={<AdminProductCreate />} />
-                  <Route path="productos/editar/:id" element={<AdminProductEdit />} />
+                  <Route
+                    path="productos/nuevo"
+                    element={<AdminProductCreate />}
+                  />
+                  <Route
+                    path="productos/editar/:id"
+                    element={<AdminProductEdit />}
+                  />
 
                   {/* Gestión de Categorías (Rutas Actualizadas) */}
                   <Route path="categorias" element={<AdminCategories />} />
-                  <Route path="categorias/nuevo" element={<AdminCategoryCreate />} />
-                  <Route path="categorias/editar/:id" element={<AdminCategoryEdit />} />
+                  <Route
+                    path="categorias/nuevo"
+                    element={<AdminCategoryCreate />}
+                  />
+                  <Route
+                    path="categorias/editar/:id"
+                    element={<AdminCategoryEdit />}
+                  />
 
                   {/* Gestión de Productos Custom */}
                   <Route path="custom" element={<AdminCustom />} />

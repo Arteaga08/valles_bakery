@@ -153,11 +153,30 @@ const updateProduct = asyncHandler(async (req, res) => {
   res.json(updated);
 });
 
+// ==============================
+// GET BY SLUG (CÁTALOGO PÚBLICO)
+// ==============================
+const getProductBySlug = asyncHandler(async (req, res) => {
+  // Buscamos específicamente por el campo 'slug'
+  const product = await Product.findOne({ slug: req.params.slug }).populate(
+    "category",
+    "name slug"
+  );
+
+  if (!product) {
+    res.status(404);
+    throw new Error("Producto no encontrado");
+  }
+
+  res.json(product);
+});
+
 export {
   handleUpload,
   createProduct,
   getProducts,
   getBestSellers,
+  getProductBySlug,
   getProductById,
   deleteProduct,
   updateProduct,

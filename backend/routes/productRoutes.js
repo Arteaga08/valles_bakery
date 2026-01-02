@@ -5,6 +5,7 @@ import {
   createProduct,
   getProducts,
   getBestSellers,
+  getProductBySlug,
   getProductById,
   deleteProduct,
   updateProduct,
@@ -15,6 +16,7 @@ import { protect, admin } from "../middleware/authMiddleware.js";
 // PUBLIC
 router.get("/", getProducts);
 router.get("/bestsellers", getBestSellers);
+router.get("/slug/:slug", getProductBySlug);
 router.get("/:id", getProductById);
 
 // ADMIN
