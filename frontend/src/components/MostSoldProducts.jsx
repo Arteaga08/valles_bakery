@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation, Scrollbar, FreeMode } from "swiper/modules";
+import { Link } from "react-router-dom";
 import API from "../service/api";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
@@ -154,7 +155,10 @@ const MostSoldProducts = () => {
 
             return (
               <SwiperSlide key={product._id} className="flex justify-center">
-                <div className="group/card cursor-pointer w-full max-w-85 md:max-w-none">
+                <Link
+                  to={`/productos/${product.slug}`}
+                  className="group/card cursor-pointer w-full max-w-85 md:max-w-none block"
+                >
                   <div className="relative aspect-4/5 rounded-xl overflow-hidden mb-5 bg-[#f9f3e5]">
                     {product.tags?.[0] && (
                       <span className="absolute top-4 left-4 z-20 bg-white text-[10px] font-black px-3 py-1.5 rounded-full uppercase text-[#e64a85]">
@@ -188,30 +192,30 @@ const MostSoldProducts = () => {
                       {product.shortDescription}
                     </p>
                   </div>
-                </div>
+                </Link>
               </SwiperSlide>
             );
           })}
         </Swiper>
         <style jsx global>{`
-  .swiper-scrollbar {
-    background: #f1f1f1 !important;
-    height: 4px !important;
-    bottom: 10px !important;
-    width: 80% !important;
-    left: 10% !important;
-    border-radius: 10px;
-  }
-  .swiper-scrollbar-drag {
-    background: #e64a85 !important;
-    border-radius: 10px;
-    transition: transform 0.9s cubic-bezier(0.25, 1, 0.5, 1) !important;
-  }
-  /* Estilo opcional para que la transición de imágenes sea más suave */
-  .group-hover\/card\:opacity-100 {
-    transition: opacity 0.7s ease-in-out;
-  }
-`}</style>
+          .swiper-scrollbar {
+            background: #f1f1f1 !important;
+            height: 4px !important;
+            bottom: 10px !important;
+            width: 80% !important;
+            left: 10% !important;
+            border-radius: 10px;
+          }
+          .swiper-scrollbar-drag {
+            background: #e64a85 !important;
+            border-radius: 10px;
+            transition: transform 0.9s cubic-bezier(0.25, 1, 0.5, 1) !important;
+          }
+          /* Estilo opcional para que la transición de imágenes sea más suave */
+          .group-hover\/card\:opacity-100 {
+            transition: opacity 0.7s ease-in-out;
+          }
+        `}</style>
       </div>
     </section>
   );

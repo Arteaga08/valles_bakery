@@ -40,7 +40,7 @@ const ProductDetail = () => {
     product.price + (selectedSize ? selectedSize.priceAdjustment : 0);
 
   return (
-    <div className="bg-[#FAF7F2] min-h-screen pt-28 pb-20 px-4 md:px-12">
+    <div className="bg-white-soft min-h-screen pt-8 pb-20 px-4 md:px-12">
       <div className="max-w-325 mx-auto">
         {/* BOTÓN VOLVER - Uso de Black Bean */}
         <button

@@ -1,4 +1,5 @@
 import React from "react";
+import { Link } from "react-router-dom";
 
 const CustomOrders = () => {
   return (
@@ -7,7 +8,7 @@ const CustomOrders = () => {
         {/* LADO IZQUIERDO: TEXTO (60%) */}
         <div className="w-full md:w-[60%] px-8 md:px-20 py-12 text-center md:text-left z-10">
           <h2 className="text-4xl md:text-6xl font-serif text-[#441C22] mb-6 leading-tight">
-            Catering, regalos y eventos
+            Para tu Boda, Catering y eventos
           </h2>
           <p className="text-lg text-[#441C22] font-medium opacity-90 mb-8 max-w-xl">
             Nuestro equipo de catering, regalos y eventos está listo para llenar
@@ -16,9 +17,12 @@ const CustomOrders = () => {
             grande ni demasiado pequeña!
           </p>
 
-          <button className="px-10 py-3 bg-[#441C22] text-white font-bold uppercase tracking-widest text-sm rounded-full hover:bg-[#5a252d] transition-colors shadow-md">
-            Contactanos
-          </button>
+          <Link
+            to="/catering-eventos"
+            className="inline-block px-10 py-3 bg-black-bean text-white font-bold uppercase tracking-widest text-sm rounded-full hover:bg-[#D97E8A] transition-colors shadow-md"
+          >
+            Saber más
+          </Link>
         </div>
 
         {/* LADO DERECHO: RAYAS Y IMAGEN (40%) */}

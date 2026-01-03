@@ -1,12 +1,10 @@
 import { useState, useEffect } from "react";
 import HeroCarousel from "../components/HeroCarousel";
-import FavoritesWheel from "../components/FavoritesWheel";
 import CategoriesGrid from "../components/CategoriesGrid";
 import ShippingInfo from "../components/ShippingInfo";
 import MostSoldProducts from "../components/MostSoldProducts";
 import CustomOrders from "../components/CustomOrders";
 import API from "../service/api";
-
 
 const Home = () => {
   const [products, setProducts] = useState([]);
@@ -57,6 +55,7 @@ const Home = () => {
       <CategoriesGrid categories={categories} />
 
       {/* SECCIÓN 4: INFORMACIÓN DE VALOR (ENVÍOS Y CALIDAD) */}
+
       <ShippingInfo />
       <CustomOrders />
     </div>

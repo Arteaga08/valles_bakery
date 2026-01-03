@@ -4,6 +4,8 @@ import Home from "./pages/Home";
 import Products from "./pages/Products";
 import ProductDetail from "./pages/ProductDetail";
 import Footer from "./components/Footer";
+import ScrollToTop from "./components/ScrollToTop";
+import CateringEvents from "./pages/CateringEvents";
 
 //  IMPORTS DE ADMINISTRACIÓN ---
 import AdminRoute from "./auth/AdminRoute";
@@ -26,6 +28,7 @@ import AdminCategoryEdit from "./pages/admin/AdminCategoryEdit";
 function App() {
   return (
     <Router>
+      <ScrollToTop />
       <Routes>
         {/* 1. RUTAS PÚBLICAS */}
         <Route
@@ -39,6 +42,10 @@ function App() {
                   <Route path="/productos" element={<Products />} />
                   <Route path="/productos/:slug" element={<ProductDetail />} />
                   <Route path="/login" element={<AdminLogin />} />
+                  <Route
+                    path="/catering-eventos"
+                    element={<CateringEvents />}
+                  />
                 </Routes>
               </main>
               <Footer />
