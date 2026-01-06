@@ -4,21 +4,21 @@ import { Link } from "react-router-dom";
 const DeliveryOptions = () => {
   const options = [
     {
-      title: "Entregas Locales",
+      title: "Personaliza",
       image:
         "https://images.unsplash.com/photo-1587314168485-3236d6710814?q=80&w=800&auto=format&fit=crop",
       bgColor: "bg-[#FFF9C4]", // Amarillo pastel
       patternColor: "#FDE68A",
     },
     {
-      title: "Ordena y Recoge en nuestro local",
+      title: "Para tus fiestas y eventos",
       image:
         "https://images.unsplash.com/photo-1578985545062-69928b1d9587?q=80&w=800&auto=format&fit=crop",
       bgColor: "bg-[#E3F2FD]", // Azul pastel
       patternColor: "#BBDEFB",
     },
     {
-      title: "Bodas y Eventos",
+      title: "Somos parte de tu familia",
       image:
         "https://images.unsplash.com/photo-1535141192574-5d4897c12636?q=80&w=800&auto=format&fit=crop",
       bgColor: "bg-[#F3E5F5]", // Morado pastel
@@ -31,13 +31,11 @@ const DeliveryOptions = () => {
       <div className="max-w-350 mx-auto text-center">
         {/* Encabezado */}
         <h2 className="text-5xl md:text-6xl font-serif text-[#1F412E] mb-4">
-          Envios y Pick Up
+          Peronsaliza tu pedido
         </h2>
         <p className="text-lg text-[#1F412E] font-medium opacity-80 max-w-3xl mx-auto mb-10 leading-relaxed">
-          Te facilitamos conseguir lo mejor de Vallée Cupcakes, estés donde
-          estés. Pide ahora con envío, recoge en tu tienda local
-          o contacta con nuestro equipo para organizar un catering personalizado
-          para tu próximo evento.
+          En Vallée Cupcakes te ayudamos a hacer tu idea realidad. Escribenos si
+          tienes un pedido personalizable para tus fiestas y eventos
         </p>
 
         {/* Grid de opciones */}

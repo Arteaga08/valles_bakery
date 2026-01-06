@@ -1,9 +1,12 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { ShoppingBag, ArrowLeft, Heater, Gift } from "lucide-react";
+import { useCart } from "../context/CartContext";
 import API from "../service/api";
 
 const ProductDetail = () => {
+  const { addToCart } = useCart();
+  const [isAdded, setIsAdded] = useState(false);
   const { slug } = useParams();
   const navigate = useNavigate();
   const [product, setProduct] = useState(null);
@@ -138,12 +141,36 @@ const ProductDetail = () => {
             </div>
 
             {/* BOTÓN AGREGAR - Fondo Black Bean, Texto Baby Pink */}
-            <button className="w-full bg-black-bean text-[#E7C0BC] py-6 rounded-3xl text-[14px] font-black uppercase tracking-[0.2em] hover:bg-[#D97E8A] hover:text-white transition-all duration-500 shadow-2xl flex items-center justify-center gap-4 group">
-              <ShoppingBag
-                size={20}
-                className="group-hover:scale-110 transition-transform"
-              />
-              Agregar al carrito — ${totalPrice}
+            <button
+              onClick={() => {
+                if (product && selectedSize) {
+                  addToCart(product, selectedSize, totalPrice);
+                  setIsAdded(true);
+                  // Regresa al estado original después de 2 segundos
+                  setTimeout(() => setIsAdded(false), 2000);
+                }
+              }}
+              disabled={isAdded}
+              className={`w-full py-6 rounded-3xl text-[14px] font-black uppercase tracking-[0.2em] transition-all duration-500 shadow-2xl flex items-center justify-center gap-4 group active:scale-95 ${
+                isAdded
+                  ? "bg-[#D1EAD8] text-[#1F412E]" // Verde suave de éxito (paleta Magnolia)
+                  : "bg-black-bean text-[#E7C0BC] hover:bg-[#D97E8A] hover:text-white"
+              }`}
+            >
+              {isAdded ? (
+                <>
+                  <div className="animate-bounce"></div>
+                  ¡Añadido con éxito!
+                </>
+              ) : (
+                <>
+                  <ShoppingBag
+                    size={20}
+                    className="group-hover:scale-110 transition-transform"
+                  />
+                  Agregar al carrito — ${totalPrice}
+                </>
+              )}
             </button>
 
             {/* DETALLES EXTRA - Iconos en New York Pink */}
@@ -178,7 +205,6 @@ const ProductDetail = () => {
                 </div>
               </div>
             </div>
-
           </div>
         </div>
       </div>

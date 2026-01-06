@@ -6,6 +6,8 @@ import ProductDetail from "./pages/ProductDetail";
 import Footer from "./components/Footer";
 import ScrollToTop from "./components/ScrollToTop";
 import CateringEvents from "./pages/CateringEvents";
+import { CartProvider } from "./context/CartContext";
+import CartPage from "./pages/CartPage";
 
 //  IMPORTS DE ADMINISTRACIÓN ---
 import AdminRoute from "./auth/AdminRoute";
@@ -27,6 +29,7 @@ import AdminCategoryEdit from "./pages/admin/AdminCategoryEdit";
 
 function App() {
   return (
+    <CartProvider>
     <Router>
       <ScrollToTop />
       <Routes>
@@ -41,6 +44,7 @@ function App() {
                   <Route path="/" element={<Home />} />
                   <Route path="/productos" element={<Products />} />
                   <Route path="/productos/:slug" element={<ProductDetail />} />
+                  <Route path="/carrito" element={<CartPage />} />
                   <Route path="/login" element={<AdminLogin />} />
                   <Route
                     path="/catering-eventos"
@@ -93,6 +97,7 @@ function App() {
         </Route>
       </Routes>
     </Router>
+    </CartProvider>
   );
 }
 
