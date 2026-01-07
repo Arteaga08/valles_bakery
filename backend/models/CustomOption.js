@@ -1,5 +1,3 @@
-// /backend/models/CustomOption.js
-
 import mongoose from "mongoose";
 
 const CustomOptionSchema = mongoose.Schema(
@@ -7,8 +5,14 @@ const CustomOptionSchema = mongoose.Schema(
     type: {
       type: String,
       required: true,
-      // Los tipos de personalización definidos por el cliente (Bizcocho, Relleno, etc.)
-      enum: ["CakeTier", "Filling", "Shape", "Extra", "Decoration"],
+      enum: [
+        "Size",
+        "Filling",
+        "Shape", // 👈 Este se usará tanto para la opción como para el Producto Base
+        "Flavor",
+        "Decoration",
+        "Extra",
+      ],
     },
     name: {
       type: String,
@@ -18,15 +22,28 @@ const CustomOptionSchema = mongoose.Schema(
     basePrice: {
       type: Number,
       required: true,
-      default: 0.0, // Costo adicional por esta opción
+      default: 0.0,
     },
     image: {
-      type: String, // URL de la imagen que representa esta opción
+      type: String,
     },
     isActive: {
       type: Boolean,
       default: true,
     },
+    // --- AÑADE ESTOS CAMPOS PARA QUE NO SE BORREN AL GUARDAR ---
+    shortDescription: {
+      type: String,
+    },
+    shapeType: {
+      type: String, // Para identificar si el lienzo es Circular, Corazón, etc.
+    },
+    allowedOptions: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "CustomOption", // Referencia a otros ingredientes
+      },
+    ],
   },
   {
     timestamps: true,
@@ -34,5 +51,4 @@ const CustomOptionSchema = mongoose.Schema(
 );
 
 const CustomOption = mongoose.model("CustomOption", CustomOptionSchema);
-
 export default CustomOption;

@@ -51,7 +51,7 @@ app.get("/", (req, res) => {
   res.send("Bakery API is running...");
 });
 
-const PORT = process.env.PORT || 50002;
+const PORT = process.env.PORT || 5002;
 
 app.listen(PORT, () =>
   console.log(chalk.yellow(`Server running on port ${PORT}`))

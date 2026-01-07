@@ -16,15 +16,35 @@ const Products = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
+        setLoading(true);
+
+        // 1. Cargamos categorías y productos normales primero (lo vital)
         const [resP, resC] = await Promise.all([
           API.get("/products"),
           API.get("/categories"),
         ]);
-        setProducts(resP.data);
+
+        let customData = [];
+        try {
+          // 2. Intentamos cargar los custom por separado para que no rompa el menú si falla
+          const resCustom = await API.get("/custom-options/products");
+          customData = resCustom.data;
+        } catch (customErr) {
+          console.error(
+            "Los productos custom no pudieron cargarse:",
+            customErr
+          );
+          // Si falla, customData se queda como array vacío [] y el menú sigue funcionando
+        }
+
+        // 3. Unificamos
+        const unifiedProducts = [...resP.data, ...customData];
+
+        setProducts(unifiedProducts);
         setCategories(resC.data);
-        setLoading(false);
       } catch (error) {
-        console.error("Error cargando datos:", error);
+        console.error("Error crítico cargando menú:", error);
+      } finally {
         setLoading(false);
       }
     };
@@ -124,21 +144,29 @@ const Products = () => {
                 <div className="lg:w-3/4">
                   <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-x-2 md:gap-x-6 gap-y-10 md:gap-y-16">
                     {visibleItems.map((product) => {
-                      const mainImageObj =
-                        product.images?.find((img) => img.isMain) ||
-                        product.images?.[0];
-                      const mainImageUrl = mainImageObj ? mainImageObj.url : "";
-                      const hoverImageObj =
-                        product.images?.find((img) => !img.isMain) ||
-                        mainImageObj;
-                      const hoverImageUrl = hoverImageObj
-                        ? hoverImageObj.url
-                        : mainImageUrl;
+                      // ✅ Lógica de Imagen Adaptable:
+                      // Si el producto tiene 'image' (Custom), la usamos.
+                      // Si no, buscamos en el array 'images' (Normal).
+                      const mainImageUrl = product.image
+                        ? product.image
+                        : product.images?.find((img) => img.isMain)?.url ||
+                          product.images?.[0]?.url ||
+                          "";
+
+                      const hoverImageUrl = product.image
+                        ? product.image
+                        : product.images?.find((img) => !img.isMain)?.url ||
+                          mainImageUrl;
 
                       return (
                         <Link
                           key={product._id}
-                          to={`/productos/${product.slug}`}
+                          // ✅ Ruta dinámica: Si tiene shapeType va al personalizador, si no al detalle normal.
+                          to={
+                            product.shapeType
+                              ? `/custom/${product._id}`
+                              : `/productos/${product.slug}`
+                          }
                           className="flex flex-col h-full group bg-white rounded-2xl p-3 md:p-4 shadow-sm hover:shadow-md transition-shadow duration-300 cursor-pointer"
                         >
                           {/* FOTO */}
@@ -165,15 +193,19 @@ const Products = () => {
                               {product.shortDescription || ""}
                             </p>
 
-                            {/* Precio (Visible en móvil debajo del texto) */}
+                            {/* Precio Móvil */}
                             <span className="text-[#D97E8A] font-black text-[16px] md:text-lg mb-2 md:hidden">
                               ${product.price}
                             </span>
 
-                            {/* BOTÓN DESKTOP CON PRECIO */}
+                            {/* BOTÓN DESKTOP */}
                             <div className="hidden md:flex mt-auto w-full pt-2">
                               <button className="w-full bg-black-bean text-white py-4 rounded-xl text-[13px] font-black uppercase tracking-widest hover:bg-[#D97E8A] transition-colors duration-300 flex justify-center gap-2">
-                                <span>Agregar al carrito</span>
+                                <span>
+                                  {product.shapeType
+                                    ? "Personalizar"
+                                    : "Agregar al carrito"}
+                                </span>
                                 <span className="opacity-30">|</span>
                                 <span>${product.price}</span>
                               </button>

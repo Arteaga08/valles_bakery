@@ -9,6 +9,7 @@ const DeliveryOptions = () => {
         "https://images.unsplash.com/photo-1587314168485-3236d6710814?q=80&w=800&auto=format&fit=crop",
       bgColor: "bg-[#FFF9C4]", // Amarillo pastel
       patternColor: "#FDE68A",
+      url: "/personalizar",
     },
     {
       title: "Para tus fiestas y eventos",
@@ -16,6 +17,7 @@ const DeliveryOptions = () => {
         "https://images.unsplash.com/photo-1578985545062-69928b1d9587?q=80&w=800&auto=format&fit=crop",
       bgColor: "bg-[#E3F2FD]", // Azul pastel
       patternColor: "#BBDEFB",
+      url: "/personalizar",
     },
     {
       title: "Somos parte de tu familia",
@@ -23,6 +25,7 @@ const DeliveryOptions = () => {
         "https://images.unsplash.com/photo-1535141192574-5d4897c12636?q=80&w=800&auto=format&fit=crop",
       bgColor: "bg-[#F3E5F5]", // Morado pastel
       patternColor: "#E1BEE7",
+      url: "/personalizar",
     },
   ];
 
@@ -41,7 +44,8 @@ const DeliveryOptions = () => {
         {/* Grid de opciones */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-0">
           {options.map((opt, index) => (
-            <div
+            <Link
+              to={opt.url}
               key={index}
               className="flex flex-col items-center group cursor-pointer"
             >
@@ -72,7 +76,8 @@ const DeliveryOptions = () => {
               <h3 className="mt-6 text-xl font-medium text-[#1F412E] group-hover:underline underline-offset-4">
                 {opt.title}
               </h3>
-            </div>
+              
+            </Link>
           ))}
         </div>
       </div>
