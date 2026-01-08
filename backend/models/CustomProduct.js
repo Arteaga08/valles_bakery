@@ -6,6 +6,13 @@ const customProductSchema = mongoose.Schema(
     name: { type: String, required: true },
     slug: { type: String, required: true },
     image: { type: String, required: true }, // La foto del pastel
+    images: [
+      {
+        url: { type: String },
+        isMain: { type: Boolean, default: false },
+      },
+    ],
+
     price: { type: Number, required: true, default: 0 }, // Precio base
 
     // Aquí guardamos qué forma usa este producto (ej: "Heart")

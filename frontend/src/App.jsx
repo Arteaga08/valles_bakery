@@ -9,6 +9,7 @@ import CateringEvents from "./pages/CateringEvents";
 import { CartProvider } from "./context/CartContext";
 import CartPage from "./pages/CartPage";
 import SpecialOrders from "./pages/SpecialOrders";
+import CustomCakeDetail from "./pages/CustomCakeDetail";
 
 //  IMPORTS DE ADMINISTRACIÓN ---
 import AdminRoute from "./auth/AdminRoute";
@@ -51,6 +52,7 @@ function App() {
                       path="/productos/:slug"
                       element={<ProductDetail />}
                     />
+                    <Route path="/custom/:id" element={<CustomCakeDetail />} />
                     <Route path="/personalizar" element={<SpecialOrders />} />
                     <Route path="/carrito" element={<CartPage />} />
                     <Route path="/login" element={<AdminLogin />} />

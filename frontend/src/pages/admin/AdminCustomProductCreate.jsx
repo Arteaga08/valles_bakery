@@ -56,10 +56,16 @@ const AdminCustomProductCreate = () => {
   }, []);
 
   // 2. CARGAR OPCIONES Y DATOS DEL PRODUCTO
+  const [categories, setCategories] = useState();
+
   useEffect(() => {
     const fetchData = async () => {
       try {
         const { data: optionsData } = await API.get("/custom-options");
+        // CARGAR CATEGORÍAS
+        const { data: catData } = await API.get("/categories");
+        setCategories(catData);
+
         setDbOptions({
           Size: optionsData.filter((o) => o.type === "Size"),
           Flavor: optionsData.filter((o) => o.type === "Flavor"),
@@ -68,14 +74,28 @@ const AdminCustomProductCreate = () => {
         });
 
         if (id) {
-          const { data: productData } = await API.get(`/products/${id}`);
+          const { data: productData } = await API.get(
+            `/custom-options/products/${id}`
+          );
           setProduct({
             ...productData,
             allowedOptions:
               productData.allowedOptions?.map((opt) =>
                 typeof opt === "object" ? opt._id : opt
               ) || [],
+            // Aseguramos que mantenga la categoría que ya tenía
+            category: productData.category?._id || productData.category,
           });
+        } else {
+          // SI ES NUEVO: Buscamos la categoría "Mi Pastel" automáticamente
+          const miPastelCat = catData.find(
+            (c) =>
+              c.name.toLowerCase().includes("mi pastel") ||
+              c.name.toLowerCase().includes("personaliza")
+          );
+          if (miPastelCat) {
+            setProduct((prev) => ({ ...prev, category: miPastelCat._id }));
+          }
         }
       } catch (error) {
         console.error("Error cargando datos:", error);

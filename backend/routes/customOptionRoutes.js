@@ -5,31 +5,34 @@ import {
   getCustomOptions,
   updateCustomOption,
   deleteCustomOption,
-  getCustomProducts, // Asegúrate de que esté importado
+  getCustomProducts,
+  getCustomProductById,
   createCustomProductBase,
   updateCustomProductBase,
+  deleteCustomProductBase,
 } from "../controllers/customOptionController.js";
 import { protect, admin } from "../middleware/authMiddleware.js";
 
-// --- 1. RUTAS ESPECÍFICAS (Deben ir primero) ---
+// --- 1. RUTAS DE PRODUCTOS BASE (Lienzos/Formas) ---
 
-// Rutas para los Productos Base (Lienzos/Formas)
 router
   .route("/products")
-  .get( getCustomProducts) // Ahora Express encontrará esto primero
+  .get(getCustomProducts) // Trae todos los pasteles para el menú
   .post(protect, admin, createCustomProductBase);
 
-router.route("/products/:id").put(protect, admin, updateCustomProductBase);
+router
+  .route("/products/:id")
+  .get(getCustomProductById)
+  .put(protect, admin, updateCustomProductBase)
+  .delete(protect, admin, deleteCustomProductBase);
 
-// --- 2. RUTAS DINÁMICAS (Deben ir al final) ---
+// --- 2. RUTAS DE OPCIONES (Ingredientes/Extras) ---
 
-// Rutas para las Opciones (Bizcochos, Rellenos, etc.)
 router
   .route("/")
   .get(getCustomOptions)
   .post(protect, admin, createCustomOption);
 
-// Esta ruta es la que "atrapaba" a /products antes. Al estar abajo, ya no hay conflicto.
 router
   .route("/:id")
   .put(protect, admin, updateCustomOption)

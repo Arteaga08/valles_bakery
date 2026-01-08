@@ -1,126 +1,52 @@
-import CustomOption from "../models/CustomOption.js";
-import CustomProduct from "../models/CustomProduct.js"; // ✅ Importante: Usaremos este para los lienzos
 import asyncHandler from "express-async-handler";
+import CustomOption from "../models/CustomOption.js";
+import CustomProduct from "../models/CustomProduct.js";
+import Category from "../models/Category.js";
 
-// ==========================================
-// CONTROLADORES PARA OPCIONES (Ingredientes/Extras)
-// ==========================================
-// (Estos se quedan igual, manejan la tabla 'customoptions')
-
-const createCustomOption = asyncHandler(async (req, res) => {
-  const { type, name, basePrice, image } = req.body;
-
-  if (!type || !name) {
-    res.status(400);
-    throw new Error("Please include option type and name.");
-  }
-
-  const allowedTypes = [
-    "Size",
-    "Filling",
-    "Shape",
-    "Flavor",
-    "Decoration",
-    "Extra",
-  ];
-  if (!allowedTypes.includes(type)) {
-    res.status(400);
-    throw new Error(`El tipo "${type}" no es válido.`);
-  }
-
-  const option = await CustomOption.create({
-    type,
-    name,
-    basePrice: basePrice || 0.0,
-    image,
-  });
-
-  res.status(201).json(option);
-});
-
-const getCustomOptions = asyncHandler(async (req, res) => {
-  const filter = { isActive: true };
-  if (req.query.type) {
-    filter.type = req.query.type;
-  }
-  const options = await CustomOption.find(filter).sort({ type: 1, name: 1 });
-  res.status(200).json(options);
-});
-
-const updateCustomOption = asyncHandler(async (req, res) => {
-  const { type, name, basePrice, image, isActive } = req.body;
-  const option = await CustomOption.findById(req.params.id);
-
-  if (option) {
-    option.type = type || option.type;
-    option.name = name || option.name;
-    option.basePrice = basePrice !== undefined ? basePrice : option.basePrice;
-    option.image = image || option.image;
-    option.isActive = isActive !== undefined ? isActive : option.isActive;
-
-    const updatedOption = await option.save();
-    res.json(updatedOption);
-  } else {
-    res.status(404);
-    throw new Error("Custom Option not found");
-  }
-});
-
-const deleteCustomOption = asyncHandler(async (req, res) => {
-  const option = await CustomOption.findById(req.params.id);
-  if (option) {
-    await CustomOption.deleteOne({ _id: option._id });
-    res.json({ message: "Custom Option removed" });
-  } else {
-    res.status(404);
-    throw new Error("Custom Option not found");
-  }
-});
-
-// ==========================================
-// CONTROLADORES PARA PRODUCTOS BASE (Lienzos/Formas)
-// ==========================================
-// AQUÍ ESTABAN LOS ERRORES. AHORA USAN CustomProduct (Tabla separada)
-
-// @desc    Get only Custom Products for the Admin Table
-const getCustomProducts = asyncHandler(async (req, res) => {
-  // ✅ CORREGIDO: Usamos CustomProduct.find.
-  // Ya no filtramos por type="Shape" porque esta tabla SOLO tiene productos custom.
-  const products = await CustomProduct.find({})
-    .populate("allowedOptions") // Opcional: para ver los nombres de los ingredientes
-    .sort({ createdAt: -1 });
-  res.json(products);
-});
-
-// @desc    Create a base Custom Product
+// @desc    Crear un nuevo modelo de pastel personalizado (Lienzo/Forma)
+// @route   POST /api/custom-options/products
 const createCustomProductBase = asyncHandler(async (req, res) => {
-  const {
-    name,
-    slug,
-    price,
-    images,
-    allowedOptions,
-    shortDescription,
-    shapeType,
-  } = req.body;
+  const { name, price, images, allowedOptions, shortDescription, shapeType } =
+    req.body;
 
-  // ✅ CORREGIDO: Usamos CustomProduct.create
-  // Esto asegura que vaya a la colección 'customproducts' y no a 'customoptions'
+  const miPastelCategory = await Category.findOne({ slug: "mi-pastel" });
+
+  if (!miPastelCategory) {
+    res.status(400);
+    throw new Error(
+      "La categoría 'Mi pastel' no existe. Por favor créala en el panel de categorías."
+    );
+  }
+
+  const generatedSlug = name
+    .toLowerCase()
+    .trim()
+    .replace(/[^\w\s-]/g, "")
+    .replace(/[\s_-]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+
   const product = await CustomProduct.create({
     name,
-    slug: slug || name?.toLowerCase().replace(/ /g, "-"), // Generamos slug si no viene
-    price: Number(price), // CustomProduct usa 'price', no 'basePrice'
-    image: images[0]?.url || "",
-    shapeType,
+    slug: generatedSlug,
+    price: Number(price),
+    image: images && images.length > 0 ? images[0].url : "",
+    images: images || [],
     allowedOptions,
     shortDescription,
-    isActive: true,
+    category: miPastelCategory._id,
+    shapeType,
   });
 
-  res.status(201).json(product);
+  if (product) {
+    res.status(201).json(product);
+  } else {
+    res.status(400);
+    throw new Error("Datos de producto inválidos");
+  }
 });
 
-// @desc    Update a base Custom Product
+// @desc    Actualizar modelo de pastel personalizado
+// @route   PUT /api/custom-options/products/:id
 const updateCustomProductBase = asyncHandler(async (req, res) => {
   const {
     name,
@@ -131,9 +57,6 @@ const updateCustomProductBase = asyncHandler(async (req, res) => {
     shapeType,
     isActive,
   } = req.body;
-
-  // ✅ CORREGIDO CRÍTICO: Antes decías 'Product.findById' (que no existía).
-  // Ahora usamos CustomProduct.findById
   const product = await CustomProduct.findById(req.params.id);
 
   if (product) {
@@ -142,10 +65,12 @@ const updateCustomProductBase = asyncHandler(async (req, res) => {
     product.allowedOptions = allowedOptions || product.allowedOptions;
     product.shortDescription = shortDescription || product.shortDescription;
     product.shapeType = shapeType || product.shapeType;
+
     if (isActive !== undefined) product.isActive = isActive;
 
     if (images && images.length > 0) {
       product.image = images[0].url;
+      product.images = images;
     }
 
     const updatedProduct = await product.save();
@@ -156,12 +81,90 @@ const updateCustomProductBase = asyncHandler(async (req, res) => {
   }
 });
 
+// @desc    Eliminar modelo de pastel personalizado (ESTA FALTABA)
+// @route   DELETE /api/custom-options/products/:id
+const deleteCustomProductBase = asyncHandler(async (req, res) => {
+  const product = await CustomProduct.findById(req.params.id);
+
+  if (product) {
+    await product.deleteOne();
+    res.json({ message: "Modelo de pastel eliminado correctamente" });
+  } else {
+    res.status(404);
+    throw new Error("Modelo de pastel no encontrado");
+  }
+});
+
+// @desc    Obtener todos los modelos de productos personalizados
+const getCustomProducts = asyncHandler(async (req, res) => {
+  const products = await CustomProduct.find({ isActive: true }).populate(
+    "allowedOptions"
+  );
+  res.json(products);
+});
+
+// @desc    Obtener un modelo por ID
+const getCustomProductById = asyncHandler(async (req, res) => {
+  const product = await CustomProduct.findById(req.params.id).populate(
+    "allowedOptions"
+  );
+  if (product) {
+    res.json(product);
+  } else {
+    res.status(404);
+    throw new Error("Producto no encontrado");
+  }
+});
+
+// --- OPCIONES (Bizcochos, Rellenos, etc.) ---
+
+const createCustomOption = asyncHandler(async (req, res) => {
+  const { name, type, basePrice } = req.body;
+  const option = await CustomOption.create({ name, type, basePrice });
+  res.status(201).json(option);
+});
+
+const getCustomOptions = asyncHandler(async (req, res) => {
+  const { type } = req.query;
+  const filter = type ? { type } : {};
+  const options = await CustomOption.find(filter);
+  res.json(options);
+});
+
+const updateCustomOption = asyncHandler(async (req, res) => {
+  const option = await CustomOption.findById(req.params.id);
+  if (option) {
+    option.name = req.body.name || option.name;
+    option.type = req.body.type || option.type;
+    option.basePrice =
+      req.body.basePrice !== undefined ? req.body.basePrice : option.basePrice;
+    const updated = await option.save();
+    res.json(updated);
+  } else {
+    res.status(404);
+    throw new Error("Opción no encontrada");
+  }
+});
+
+const deleteCustomOption = asyncHandler(async (req, res) => {
+  const option = await CustomOption.findById(req.params.id);
+  if (option) {
+    await option.deleteOne();
+    res.json({ message: "Opción eliminada" });
+  } else {
+    res.status(404);
+    throw new Error("Opción no encontrada");
+  }
+});
+
 export {
   createCustomOption,
   getCustomOptions,
   updateCustomOption,
   deleteCustomOption,
   getCustomProducts,
+  getCustomProductById,
   createCustomProductBase,
   updateCustomProductBase,
+  deleteCustomProductBase, // ✅ Exportada correctamente
 };

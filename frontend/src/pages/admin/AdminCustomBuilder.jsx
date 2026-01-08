@@ -6,6 +6,7 @@ import {
   Droplet,
   Sparkles,
   Plus,
+  Loader2,
   Trash2,
   DollarSign,
   Image as ImageIcon,
@@ -42,10 +43,11 @@ const AdminCustomBuilder = () => {
   const fetchOptions = async () => {
     setLoading(true);
     try {
+      // Asegúrate de que API tenga la baseURL correcta
       const { data } = await API.get(`/custom-options?type=${activeTab}`);
       setItems(data);
     } catch (error) {
-      console.error(error);
+      console.error("Error al traer opciones:", error);
     } finally {
       setLoading(false);
     }
@@ -176,27 +178,35 @@ const AdminCustomBuilder = () => {
           </form>
 
           <div className="space-y-3">
-            {items.map((item) => (
-              <div
-                key={item._id}
-                className="flex justify-between items-center p-4 border border-gray-50 hover:border-[#D97E8A]/20 transition-all rounded-xl"
-              >
-                <span className="text-sm font-bold text-[#1F412E]">
-                  {item.name}
-                </span>
-                <div className="flex items-center gap-4">
-                  <span className="text-[10px] font-bold text-[#D97E8A]">
-                    +${item.basePrice}
-                  </span>
-                  <button
-                    onClick={() => handleDelete(item._id)}
-                    className="text-gray-300 hover:text-red-500"
-                  >
-                    <Trash2 size={16} />
-                  </button>
-                </div>
+            {loading ? (
+              <div className="flex justify-center py-10">
+                <Loader2 className="animate-spin text-[#D97E8A]" />
               </div>
-            ))}
+            ) : (
+              items
+                .filter((item) => item.type === activeTab) // ✅ Filtro de seguridad en el cliente
+                .map((item) => (
+                  <div
+                    key={item._id}
+                    className="flex justify-between items-center p-4 border border-gray-50 hover:border-[#D97E8A]/20 transition-all rounded-xl"
+                  >
+                    <span className="text-sm font-bold text-[#1F412E]">
+                      {item.name}
+                    </span>
+                    <div className="flex items-center gap-4">
+                      <span className="text-[10px] font-bold text-[#D97E8A]">
+                        +${item.basePrice}
+                      </span>
+                      <button
+                        onClick={() => handleDelete(item._id)}
+                        className="text-gray-300 hover:text-red-500"
+                      >
+                        <Trash2 size={16} />
+                      </button>
+                    </div>
+                  </div>
+                ))
+            )}
           </div>
         </div>
       </div>

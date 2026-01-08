@@ -53,6 +53,7 @@ const Products = () => {
 
   useEffect(() => {
     const catId = searchParams.get("categoria");
+    // Solo disparamos el scroll cuando dejamos de cargar
     if (catId && !loading) {
       scrollToCategory(catId);
     }
@@ -72,9 +73,13 @@ const Products = () => {
 
   const sections = categories
     .map((cat) => {
-      const catProducts = products.filter(
-        (p) => p.category === cat._id || p.category?._id === cat._id
-      );
+      const catProducts = products.filter((p) => {
+        // ✅ Normalizamos ambos IDs a String para que la comparación sea infalible
+        const productCatId = p.category?._id || p.category;
+        const currentCatId = cat._id;
+
+        return String(productCatId) === String(currentCatId);
+      });
       return { ...cat, items: catProducts };
     })
     .filter((section) => section.items.length > 0);

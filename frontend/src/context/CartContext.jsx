@@ -12,41 +12,60 @@ export const CartProvider = ({ children }) => {
     localStorage.setItem("vallée_cart", JSON.stringify(cart));
   }, [cart]);
 
-  const addToCart = (product, selectedSize, totalPrice) => {
-    // Generamos un ID único que combine producto + tamaño
-    const itemId = `${product._id}-${selectedSize.name}`;
+  const addToCart = (product, details, totalPrice) => {
+    // 1. DETERMINAR ID Y TIPO DE PRODUCTO
+    let itemId;
+    let isCustom = false;
+
+    // Si 'details' tiene selectionIds, es un pastel PERSONALIZADO
+    if (details && details.selectionIds) {
+      const selectionString = Object.values(details.selectionIds).join("-");
+      itemId = `${product._id}-${selectionString}`;
+      isCustom = true;
+    } else {
+      // Si no, es un producto NORMAL (donde 'details' es el objeto 'selectedSize')
+      const sizeName = details.name || details;
+      itemId = `${product._id}-${sizeName}`;
+    }
 
     setCart((prev) => {
       const existing = prev.find((i) => i.id === itemId);
+
       if (existing) {
         return prev.map((i) =>
           i.id === itemId ? { ...i, quantity: i.quantity + 1 } : i
         );
       }
+
+      // 2. CONSTRUIR EL OBJETO DEL ITEM
       return [
         ...prev,
         {
           id: itemId,
           productId: product._id,
           name: product.name,
-          size: selectedSize.name,
+          // Guardamos los sabores/rellenos si existen
+          customDetails: isCustom ? details : null,
+          // Tamaño para mostrar en el carrito
+          size: isCustom ? details.tamaño : details.name || details,
           price: totalPrice,
+          // Soporte para imagen única (custom) o array de imágenes (normal)
           image:
-            product.images.find((img) => img.isMain)?.url ||
-            product.images[0]?.url,
+            product.image ||
+            product.images?.find((img) => img.isMain)?.url ||
+            product.images?.[0]?.url,
           quantity: 1,
+          isCustom: isCustom,
         },
       ];
     });
   };
 
-  // NUEVA FUNCIÓN: Para botones + y - en el carrito
   const updateQuantity = (itemId, delta) => {
     setCart((prev) =>
       prev.map((item) => {
         if (item.id === itemId) {
           const newQty = item.quantity + delta;
-          // Si es menos de 1, lo dejamos en 1 (o podrías llamar a removeFromCart)
           return { ...item, quantity: newQty >= 1 ? newQty : 1 };
         }
         return item;
@@ -70,7 +89,7 @@ export const CartProvider = ({ children }) => {
       value={{
         cart,
         addToCart,
-        updateQuantity, // <--- Exportamos la nueva función
+        updateQuantity,
         removeFromCart,
         clearCart,
         cartTotal,
