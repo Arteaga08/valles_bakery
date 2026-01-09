@@ -20,8 +20,6 @@ const SpecialOrders = () => {
   return (
     <div className="bg-[#FAF7F2] min-h-screen text-[#1F412E]">
       {" "}
-      {/* Black Bean color */}
-      {/* HERO SECTION */}
       <section className="relative h-[60vh] md:h-[70vh] flex items-center justify-center overflow-hidden">
         {/* Fondo con imagen oscurecida o patrón */}
         <div className="absolute inset-0 z-0">

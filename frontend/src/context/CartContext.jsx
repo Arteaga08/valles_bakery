@@ -4,8 +4,12 @@ const CartContext = createContext();
 
 export const CartProvider = ({ children }) => {
   const [cart, setCart] = useState(() => {
-    const savedCart = localStorage.getItem("vallée_cart");
-    return savedCart ? JSON.parse(savedCart) : [];
+    try {
+      const savedCart = localStorage.getItem("vallée_cart");
+      return savedCart ? JSON.parse(savedCart) : [];
+    } catch (error) {
+      return [];
+    }
   });
 
   useEffect(() => {
@@ -13,19 +17,18 @@ export const CartProvider = ({ children }) => {
   }, [cart]);
 
   const addToCart = (product, details, totalPrice) => {
-    // 1. DETERMINAR ID Y TIPO DE PRODUCTO
     let itemId;
     let isCustom = false;
 
-    // Si 'details' tiene selectionIds, es un pastel PERSONALIZADO
+    // 1. DETERMINAR ID ÚNICO (Key)
     if (details && details.selectionIds) {
       const selectionString = Object.values(details.selectionIds).join("-");
-      itemId = `${product._id}-${selectionString}`;
+      itemId = `custom-${product._id}-${selectionString}`;
       isCustom = true;
     } else {
-      // Si no, es un producto NORMAL (donde 'details' es el objeto 'selectedSize')
-      const sizeName = details.name || details;
-      itemId = `${product._id}-${sizeName}`;
+  
+      const sizeName = details?.name || details || "standard";
+      itemId = `normal-${product._id}-${sizeName}`;
     }
 
     setCart((prev) => {
@@ -37,23 +40,23 @@ export const CartProvider = ({ children }) => {
         );
       }
 
-      // 2. CONSTRUIR EL OBJETO DEL ITEM
       return [
         ...prev,
         {
           id: itemId,
           productId: product._id,
           name: product.name,
-          // Guardamos los sabores/rellenos si existen
           customDetails: isCustom ? details : null,
           // Tamaño para mostrar en el carrito
-          size: isCustom ? details.tamaño : details.name || details,
-          price: totalPrice,
-          // Soporte para imagen única (custom) o array de imágenes (normal)
+          size: isCustom ? details.tamaño : details?.name || details,
+          price: Number(totalPrice) || 0, // ✅ Aseguramos que sea número
+          // ✅ Lógica de imagen a prueba de errores
           image:
             product.image ||
-            product.images?.find((img) => img.isMain)?.url ||
-            product.images?.[0]?.url,
+            (product.images && product.images.length > 0
+              ? product.images.find((img) => img.isMain)?.url ||
+                product.images[0].url
+              : ""),
           quantity: 1,
           isCustom: isCustom,
         },
@@ -66,7 +69,7 @@ export const CartProvider = ({ children }) => {
       prev.map((item) => {
         if (item.id === itemId) {
           const newQty = item.quantity + delta;
-          return { ...item, quantity: newQty >= 1 ? newQty : 1 };
+          return { ...item, quantity: Math.max(1, newQty) };
         }
         return item;
       })
@@ -80,7 +83,7 @@ export const CartProvider = ({ children }) => {
   const clearCart = () => setCart([]);
 
   const cartTotal = cart.reduce(
-    (acc, item) => acc + item.price * item.quantity,
+    (acc, item) => acc + Number(item.price) * item.quantity,
     0
   );
 

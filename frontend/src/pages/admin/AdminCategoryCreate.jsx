@@ -1,7 +1,8 @@
 import React, { useState } from "react";
-import axios from "axios";
+import axios from "axios"; // Lo mantenemos solo para Cloudinary
 import { useNavigate } from "react-router-dom";
 import { Save, ArrowLeft, Upload, ImageIcon, Loader2 } from "lucide-react";
+import API from "../../service/api"; // ✅ Importamos nuestra instancia
 
 const AdminCategoryCreate = () => {
   const navigate = useNavigate();
@@ -10,6 +11,7 @@ const AdminCategoryCreate = () => {
 
   const handleNameChange = (e) => {
     const name = e.target.value;
+    // ✅ Mantenemos la lógica de generación de slug
     const slug = name
       .toLowerCase()
       .trim()
@@ -26,6 +28,7 @@ const AdminCategoryCreate = () => {
     data.append("file", file);
     data.append("upload_preset", "vallee_preset");
     try {
+      // ✅ Cloudinary es externo, se queda con axios directo
       const res = await axios.post(
         "https://api.cloudinary.com/v1_1/dnppruwh4/image/upload",
         data
@@ -42,13 +45,11 @@ const AdminCategoryCreate = () => {
     e.preventDefault();
     setLoading(true);
     try {
-      const token = localStorage.getItem("adminToken");
-      await axios.post("http://localhost:5002/api/categories", formData, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      await API.post("/categories", formData);
       navigate("/admin/categorias");
     } catch (err) {
-      alert("Error al crear");
+      console.error(err);
+      alert(err.response?.data?.message || "Error al crear la categoría");
     } finally {
       setLoading(false);
     }
@@ -74,7 +75,7 @@ const AdminCategoryCreate = () => {
             <input
               type="text"
               required
-              className="border-b h-10 outline-none focus:border-[#e64a85]"
+              className="border-b h-10 outline-none focus:border-[#D97E8A]"
               value={formData.name}
               onChange={handleNameChange}
             />
@@ -86,7 +87,7 @@ const AdminCategoryCreate = () => {
             <input
               type="text"
               readOnly
-              className="border-b h-10 bg-gray-50 text-gray-400"
+              className="border-b h-10 bg-gray-50 text-gray-400 cursor-not-allowed"
               value={formData.slug}
             />
           </div>
@@ -96,12 +97,13 @@ const AdminCategoryCreate = () => {
                 <img
                   src={formData.image}
                   className="w-full h-full object-cover"
+                  alt="Vista previa"
                 />
               ) : (
                 <ImageIcon className="text-gray-200" />
               )}
             </div>
-            <label className="cursor-pointer border border-[#1F412E] px-4 py-2 text-[10px] font-bold uppercase tracking-widest">
+            <label className="cursor-pointer border border-[#1F412E] px-4 py-2 text-[10px] font-bold uppercase tracking-widest hover:bg-[#1F412E] hover:text-white transition-colors">
               Subir Imagen
               <input
                 type="file"
@@ -113,7 +115,7 @@ const AdminCategoryCreate = () => {
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-[#1F412E] text-white py-4 text-[10px] font-black uppercase tracking-widest mt-8"
+            className="w-full bg-[#1F412E] text-white py-4 text-[10px] font-black uppercase tracking-widest mt-8 hover:bg-[#D97E8A] transition-colors disabled:opacity-50"
           >
             {loading ? (
               <Loader2 className="animate-spin m-auto" size={18} />

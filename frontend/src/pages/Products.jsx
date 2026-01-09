@@ -94,14 +94,14 @@ const Products = () => {
   return (
     <div className="bg-white-soft min-h-screen pb-20">
       {/* NAVEGACIÓN CATEGORÍAS */}
-      <div className="sticky top-20 z-40 bg-[#FAF7F2]/95 backdrop-blur-md pt-4 pb-6 mb-8 border-none shadow-none outline-none">
-        <div className="max-w-350 mx-auto px-6 overflow-x-auto no-scrollbar">
+      <div className="sticky top-20 z-40 bg-[#FAF7F2]/95 backdrop-blur-md pt-4 pb-4 md:border-b md:border-black-bean/5">
+        <div className="max-w-7xl mx-auto px-6 overflow-x-auto no-scrollbar">
           <div className="flex gap-8 md:justify-center min-w-max">
             {categories.map((cat) => (
               <button
                 key={cat._id}
                 onClick={() => scrollToCategory(cat._id)}
-                className="text-[10px] md:text-xs font-black uppercase tracking-[0.2em] text-black-bean hover:text-[#e64a85] transition-colors whitespace-nowrap"
+                className="text-[10px] md:text-xs font-black uppercase tracking-[0.2em] text-black-bean hover:text-[#D97E8A] transition-colors whitespace-nowrap"
               >
                 {cat.name}
               </button>

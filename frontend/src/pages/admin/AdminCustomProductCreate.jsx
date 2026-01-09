@@ -29,48 +29,36 @@ const AdminCustomProductCreate = () => {
   });
 
   const [dbShapes, setDbShapes] = useState([]);
-
   const [product, setProduct] = useState({
     name: "",
     slug: "",
     price: 0,
     images: [],
-    category: "69421b1245c4382e7ea0c916",
+    category: "",
     isCustom: true,
     allowedOptions: [],
     shortDescription: "",
     shapeType: "",
   });
 
-  // 1. CARGAR FORMAS DISPONIBLES
+  // 1. CARGAR FORMAS Y DATOS INICIALES
   useEffect(() => {
-    const fetchShapes = async () => {
+    const fetchInitialData = async () => {
       try {
-        const { data } = await API.get("/custom-options?type=Shape");
-        setDbShapes(data);
-      } catch (err) {
-        console.error("Error cargando formas:", err);
-      }
-    };
-    fetchShapes();
-  }, []);
+        // Ejecutamos peticiones en paralelo para mayor velocidad
+        const [shapesRes, optionsRes, catRes] = await Promise.all([
+          API.get("/custom-options?type=Shape"),
+          API.get("/custom-options"),
+          API.get("/categories"),
+        ]);
 
-  // 2. CARGAR OPCIONES Y DATOS DEL PRODUCTO
-  const [categories, setCategories] = useState();
-
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const { data: optionsData } = await API.get("/custom-options");
-        // CARGAR CATEGORÍAS
-        const { data: catData } = await API.get("/categories");
-        setCategories(catData);
+        setDbShapes(shapesRes.data);
 
         setDbOptions({
-          Size: optionsData.filter((o) => o.type === "Size"),
-          Flavor: optionsData.filter((o) => o.type === "Flavor"),
-          Filling: optionsData.filter((o) => o.type === "Filling"),
-          Decoration: optionsData.filter((o) => o.type === "Decoration"),
+          Size: optionsRes.data.filter((o) => o.type === "Size"),
+          Flavor: optionsRes.data.filter((o) => o.type === "Flavor"),
+          Filling: optionsRes.data.filter((o) => o.type === "Filling"),
+          Decoration: optionsRes.data.filter((o) => o.type === "Decoration"),
         });
 
         if (id) {
@@ -83,35 +71,35 @@ const AdminCustomProductCreate = () => {
               productData.allowedOptions?.map((opt) =>
                 typeof opt === "object" ? opt._id : opt
               ) || [],
-            // Aseguramos que mantenga la categoría que ya tenía
             category: productData.category?._id || productData.category,
           });
         } else {
-          // SI ES NUEVO: Buscamos la categoría "Mi Pastel" automáticamente
-          const miPastelCat = catData.find(
+          // BUSQUEDA INTELIGENTE DE CATEGORÍA
+          const miPastelCat = catRes.data.find(
             (c) =>
-              c.name.toLowerCase().includes("mi pastel") ||
-              c.name.toLowerCase().includes("personaliza")
+              c.slug === "mi-pastel" ||
+              c.name.toLowerCase().includes("mi pastel")
           );
           if (miPastelCat) {
             setProduct((prev) => ({ ...prev, category: miPastelCat._id }));
           }
         }
-      } catch (error) {
-        console.error("Error cargando datos:", error);
+      } catch (err) {
+        console.error("Error cargando datos iniciales:", err);
       } finally {
         setFetching(false);
       }
     };
-    fetchData();
+    fetchInitialData();
   }, [id]);
 
   const handleNameChange = (e) => {
     const name = e.target.value;
     const slug = name
       .toLowerCase()
-      .replace(/ /g, "-")
-      .replace(/[^\w-]+/g, "");
+      .trim()
+      .replace(/[^\w\s-]/g, "")
+      .replace(/[\s_-]+/g, "-");
     setProduct({ ...product, name, slug });
   };
 
@@ -124,7 +112,7 @@ const AdminCustomProductCreate = () => {
     formData.append("upload_preset", "vallee_preset");
 
     try {
-      // Cloudinary es una API externa, usamos axios directo
+      // Cloudinary es externo, aquí sí usamos axios directo
       const res = await axios.post(
         "https://api.cloudinary.com/v1_1/dnppruwh4/image/upload",
         formData
@@ -134,7 +122,7 @@ const AdminCustomProductCreate = () => {
         images: [{ url: res.data.secure_url, isMain: true }],
       });
     } catch (err) {
-      alert("Error al subir imagen.");
+      alert("Error al subir imagen a la nube.");
     } finally {
       setLoading(false);
     }
@@ -143,10 +131,9 @@ const AdminCustomProductCreate = () => {
   const toggleOption = (optionId) => {
     setProduct((prev) => {
       const current = prev.allowedOptions;
-      const isSelected = current.includes(optionId);
       return {
         ...prev,
-        allowedOptions: isSelected
+        allowedOptions: current.includes(optionId)
           ? current.filter((id) => id !== optionId)
           : [...current, optionId],
       };
@@ -155,25 +142,15 @@ const AdminCustomProductCreate = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (product.images.length === 0)
-      return alert("Sube la imagen base de la forma.");
-    if (!product.shapeType)
-      return alert("Selecciona una forma base geométrica.");
+    if (product.images.length === 0) return alert("Sube la imagen base.");
+    if (!product.shapeType) return alert("Selecciona una forma base.");
+    if (!product.category)
+      return alert("Error: No se encontró la categoría 'Mi Pastel'.");
 
     setLoading(true);
     try {
-      // OBTENCIÓN DEL TOKEN
-      const token = localStorage.getItem("adminToken");
-      const config = {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-      };
-
       const finalProduct = {
         ...product,
-        isCustom: true, // Forzamos que sea true
         price: Number(product.price),
         image: product.images[0].url,
         brand: "Vallée Bakery",
@@ -181,19 +158,17 @@ const AdminCustomProductCreate = () => {
         description: product.shortDescription,
       };
 
+      // ✅ API ya tiene el token inyectado, no necesitamos config
       if (id) {
-        await API.put(`/custom-options/products/${id}`, finalProduct, config);
+        await API.put(`/custom-options/products/${id}`, finalProduct);
       } else {
-        await API.post("/custom-options/products", finalProduct, config);
+        await API.post("/custom-options/products", finalProduct);
       }
 
       navigate("/admin/custom");
     } catch (err) {
       console.error("Error al guardar:", err.response?.data);
-      alert(
-        "Error: " +
-          (err.response?.data?.message || "No se pudo guardar el modelo")
-      );
+      alert(err.response?.data?.message || "No se pudo guardar el modelo");
     } finally {
       setLoading(false);
     }

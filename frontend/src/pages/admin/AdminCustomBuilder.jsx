@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
 import {
-  Save,
   Layers,
   Maximize,
   Droplet,
@@ -8,14 +7,11 @@ import {
   Plus,
   Loader2,
   Trash2,
-  DollarSign,
-  Image as ImageIcon,
   Utensils,
   ArrowLeft,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import API from "../../service/api";
-import axios from "axios";
 
 const AdminCustomBuilder = () => {
   const navigate = useNavigate();
@@ -43,7 +39,6 @@ const AdminCustomBuilder = () => {
   const fetchOptions = async () => {
     setLoading(true);
     try {
-      // Asegúrate de que API tenga la baseURL correcta
       const { data } = await API.get(`/custom-options?type=${activeTab}`);
       setItems(data);
     } catch (error) {
@@ -58,26 +53,11 @@ const AdminCustomBuilder = () => {
     if (!newItem.name) return alert("El nombre es obligatorio");
 
     try {
-      // 1. Obtener el token
-      const token = localStorage.getItem("adminToken");
-
-      // 2. Configurar el header de autorización
-      const config = {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      };
-
-      // 3. Enviar la petición con el config
-      await axios.post(
-        "http://localhost:5002/api/custom-options",
-        {
-          ...newItem,
-          type: activeTab,
-          basePrice: Number(newItem.basePrice) || 0,
-        },
-        config // <--- IMPORTANTE PASAR EL CONFIG
-      );
+      await API.post("/custom-options", {
+        ...newItem,
+        type: activeTab,
+        basePrice: Number(newItem.basePrice) || 0,
+      });
 
       setNewItem({ name: "", basePrice: "", image: "" });
       fetchOptions();
@@ -91,17 +71,7 @@ const AdminCustomBuilder = () => {
     if (!window.confirm("¿Deseas eliminar esta opción?")) return;
 
     try {
-      const token = localStorage.getItem("adminToken");
-      const config = {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      };
-
-      await axios.delete(
-        `http://localhost:5002/api/custom-options/${id}`,
-        config
-      );
+      await API.delete(`/custom-options/${id}`);
       setItems(items.filter((item) => item._id !== id));
     } catch (error) {
       alert("No se pudo eliminar la opción");
@@ -184,7 +154,7 @@ const AdminCustomBuilder = () => {
               </div>
             ) : (
               items
-                .filter((item) => item.type === activeTab) // ✅ Filtro de seguridad en el cliente
+                .filter((item) => item.type === activeTab)
                 .map((item) => (
                   <div
                     key={item._id}

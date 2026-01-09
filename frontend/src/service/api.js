@@ -1,21 +1,16 @@
 import axios from "axios";
 
 const API = axios.create({
-  // Asegúrate de que este puerto coincida con tu backend
-  baseURL: "http://localhost:5002/api",
+  baseURL: import.meta.env.VITE_API_URL || "http://localhost:5002/api",
 });
 
-// Este interceptor es clave para el futuro:
-// Enviará automáticamente el token del admin si existe.
-API.interceptors.request.use((config) => {
-  const userInfo = localStorage.getItem("userInfo")
-    ? JSON.parse(localStorage.getItem("userInfo"))
-    : null;
+API.interceptors.request.use((req) => {
+  const token = localStorage.getItem("adminToken");
 
-  if (userInfo && userInfo.token) {
-    config.headers.Authorization = `Bearer ${userInfo.token}`;
+  if (token) {
+    req.headers.Authorization = `Bearer ${token}`;
   }
-  return config;
+  return req;
 });
 
 export default API;
