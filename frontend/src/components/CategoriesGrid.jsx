@@ -1,43 +1,34 @@
-import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Scrollbar } from "swiper/modules";
-import API from "../service/api";
+import { useShop } from "../context/ShopContext";
+import { optimizeImage } from "../utils/imageOptimizer.js";
 
 import "swiper/css";
 import "swiper/css/scrollbar";
 
 const CategoriesGrid = () => {
-  const [categories, setCategories] = useState([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const fetchCategories = async () => {
-      try {
-        const { data } = await API.get("/categories");
-        setCategories(data);
-        setLoading(false);
-      } catch (error) {
-        console.error("Error al cargar categorías:", error);
-        setLoading(false);
-      }
-    };
-    fetchCategories();
-  }, []);
+  const { categories, loading } = useShop();
 
   const placeholders = [
-    "https://images.unsplash.com/photo-1571115177098-24ec42ed204d?q=80&w=800&auto=format&fit=crop",
-    "https://images.unsplash.com/photo-1558301211-0d8c8ddee6ec?q=80&w=800&auto=format&fit=crop",
-    "https://images.unsplash.com/photo-1558961363-fa8fdf82db35?q=80&w=800&auto=format&fit=crop",
-    "https://images.unsplash.com/photo-1606313564200-e75d5e30476c?q=80&w=800&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1571115177098-24ec42ed204d",
+    "https://images.unsplash.com/photo-1558301211-0d8c8ddee6ec",
+    "https://images.unsplash.com/photo-1558961363-fa8fdf82db35",
+    "https://images.unsplash.com/photo-1606313564200-e75d5e30476c",
   ];
 
-  if (loading) return null;
+  // CLS FIX: En lugar de null, renderizamos la sección vacía con su altura mínima
+  // Esto mantiene el espacio reservado y el color de fondo mientras cargan los datos.
+  if (loading) {
+    return (
+      <section className="py-24 px-6 bg-new-york-pink min-h-175 md:min-h-212.5" />
+    );
+  }
 
   return (
-    <section className="py-24 px-6 bg-new-york-pink overflow-hidden">
+    <section className="py-24 px-6 bg-new-york-pink overflow-hidden min-h-175 md:min-h-212.5">
       <div className="max-w-350 mx-auto text-center">
-        <div className="mb-14">
+        <header className="mb-14">
           <h2 className="text-5xl md:text-6xl font-serif text-[#1F412E] mb-4">
             Categorías
           </h2>
@@ -45,11 +36,8 @@ const CategoriesGrid = () => {
             Para cualquier día festivo, ocasión especial o motivo de
             celebración.
           </p>
-        </div>
+        </header>
 
-        {/* Añadimos una clase única 'categories-swiper' para no romper 
-          los estilos de la sección anterior 
-        */}
         <Swiper
           modules={[Scrollbar]}
           spaceBetween={20}
@@ -75,13 +63,21 @@ const CategoriesGrid = () => {
                   cat.slug || cat.name.toLowerCase()
                 }`}
                 className="group flex flex-col items-center w-full"
+                aria-label={`Ver productos de la categoría ${cat.name}`}
               >
-                <div className="relative w-full aspect-square overflow-hidden bg-white mb-6 rounded-sm">
+                {/* CLS FIX: Contenedor con aspecto definido */}
+                <div className="relative w-full aspect-square overflow-hidden bg-white/20 mb-6 rounded-sm shadow-sm">
                   <img
-                    src={
-                      cat.imageUrl || placeholders[index % placeholders.length]
-                    }
-                    alt={cat.name}
+                    src={optimizeImage(
+                      cat.imageUrl || placeholders[index % placeholders.length],
+                      700
+                    )}
+                    alt={`Colección de ${cat.name} - Vallée`}
+                    // CLS FIX: Atributos de tamaño explícitos para que el navegador reserve el espacio
+                    width="400"
+                    height="400"
+                    loading="lazy"
+                    decoding="async"
                     className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-110"
                   />
                 </div>
@@ -95,25 +91,20 @@ const CategoriesGrid = () => {
       </div>
 
       <style jsx global>{`
-        /* ESTILOS COMPARTIDOS PARA TODAS LAS BARRAS ROSAS */
         .swiper-scrollbar {
           height: 4px !important;
-          background: rgba(0, 0, 0, 0.05) !important;
+          background: rgba(0, 0, 0, 0.1) !important;
           border-radius: 10px !important;
         }
-
         .swiper-scrollbar-drag {
           background: #e64a85 !important;
           border-radius: 10px !important;
         }
-
-        /* AJUSTES ESPECÍFICOS PARA ESTA SECCIÓN DE CATEGORÍAS */
         .categories-swiper .swiper-scrollbar {
           width: 60% !important;
           left: 20% !important;
           bottom: 20px !important;
         }
-
         @media (min-width: 1024px) {
           .categories-swiper .swiper-scrollbar {
             display: none !important;

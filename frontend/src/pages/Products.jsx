@@ -3,30 +3,27 @@ import { useSearchParams } from "react-router-dom";
 import { ChevronUp, Plus } from "lucide-react";
 import { Link } from "react-router-dom";
 import API from "../service/api";
+import { useShop } from "../context/ShopContext"; // 1. Contexto Global
+import { optimizeImage } from "../utils/imageOptimizer.js"; // 2. Optimizador
 
 const Products = () => {
-  const [searchParams, setSearchParams] = useSearchParams();
+  const [searchParams] = useSearchParams();
+  const { categories, loading: categoriesLoading } = useShop(); // Traemos categorías del contexto
   const [products, setProducts] = useState([]);
-  const [categories, setCategories] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [productsLoading, setProductsLoading] = useState(true);
   const [expandedSections, setExpandedSections] = useState({});
 
   const MAX_VISIBLE_ITEMS = 5;
 
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchProductsData = async () => {
       try {
-        setLoading(true);
-
-        // 1. Cargamos categorías y productos normales primero (lo vital)
-        const [resP, resC] = await Promise.all([
-          API.get("/products"),
-          API.get("/categories"),
-        ]);
+        setProductsLoading(true);
+        // Solo cargamos productos, las categorías ya vienen del contexto
+        const resP = await API.get("/products");
 
         let customData = [];
         try {
-          // 2. Intentamos cargar los custom por separado para que no rompa el menú si falla
           const resCustom = await API.get("/custom-options/products");
           customData = resCustom.data;
         } catch (customErr) {
@@ -34,30 +31,25 @@ const Products = () => {
             "Los productos custom no pudieron cargarse:",
             customErr
           );
-          // Si falla, customData se queda como array vacío [] y el menú sigue funcionando
         }
 
-        // 3. Unificamos
         const unifiedProducts = [...resP.data, ...customData];
-
         setProducts(unifiedProducts);
-        setCategories(resC.data);
       } catch (error) {
-        console.error("Error crítico cargando menú:", error);
+        console.error("Error crítico cargando productos:", error);
       } finally {
-        setLoading(false);
+        setProductsLoading(false);
       }
     };
-    fetchData();
+    fetchProductsData();
   }, []);
 
   useEffect(() => {
     const catId = searchParams.get("categoria");
-    // Solo disparamos el scroll cuando dejamos de cargar
-    if (catId && !loading) {
+    if (catId && !productsLoading && !categoriesLoading) {
       scrollToCategory(catId);
     }
-  }, [searchParams, loading]);
+  }, [searchParams, productsLoading, categoriesLoading]);
 
   const scrollToCategory = (id) => {
     const element = document.getElementById(id);
@@ -71,20 +63,19 @@ const Products = () => {
     setExpandedSections((prev) => ({ ...prev, [catId]: !prev[catId] }));
   };
 
+  // Unimos categorías con sus productos correspondientes
   const sections = categories
     .map((cat) => {
       const catProducts = products.filter((p) => {
-        // ✅ Normalizamos ambos IDs a String para que la comparación sea infalible
         const productCatId = p.category?._id || p.category;
-        const currentCatId = cat._id;
-
-        return String(productCatId) === String(currentCatId);
+        return String(productCatId) === String(cat._id);
       });
       return { ...cat, items: catProducts };
     })
     .filter((section) => section.items.length > 0);
 
-  if (loading)
+  // Estado de carga unificado
+  if (productsLoading || categoriesLoading)
     return (
       <div className="h-screen flex items-center justify-center bg-[#FAF7F2] text-black-bean font-black uppercase tracking-widest">
         Cargando Menú Vallée...
@@ -93,8 +84,8 @@ const Products = () => {
 
   return (
     <div className="bg-white-soft min-h-screen pb-20">
-      {/* NAVEGACIÓN CATEGORÍAS */}
-      <div className="sticky top-20 z-40 bg-[#FAF7F2]/95 backdrop-blur-md pt-4 pb-4 md:border-b md:border-black-bean/5">
+      {/* NAVEGACIÓN CATEGORÍAS STICKY */}
+      <div className="sticky top-20 z-40 bg-[#FAF7F2]/95 backdrop-blur-md pt-4 pb-4 border-b border-black-bean/5">
         <div className="max-w-7xl mx-auto px-6 overflow-x-auto no-scrollbar">
           <div className="flex gap-8 md:justify-center min-w-max">
             {categories.map((cat) => (
@@ -149,9 +140,6 @@ const Products = () => {
                 <div className="lg:w-3/4">
                   <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-x-2 md:gap-x-6 gap-y-10 md:gap-y-16">
                     {visibleItems.map((product) => {
-                      // ✅ Lógica de Imagen Adaptable:
-                      // Si el producto tiene 'image' (Custom), la usamos.
-                      // Si no, buscamos en el array 'images' (Normal).
                       const mainImageUrl = product.image
                         ? product.image
                         : product.images?.find((img) => img.isMain)?.url ||
@@ -166,50 +154,47 @@ const Products = () => {
                       return (
                         <Link
                           key={product._id}
-                          // ✅ Ruta dinámica: Si tiene shapeType va al personalizador, si no al detalle normal.
                           to={
                             product.shapeType
                               ? `/custom/${product._id}`
                               : `/productos/${product.slug}`
                           }
-                          className="flex flex-col h-full group bg-white rounded-2xl p-3 md:p-4 shadow-sm hover:shadow-md transition-shadow duration-300 cursor-pointer"
+                          className="flex flex-col h-full group bg-white rounded-2xl p-3 md:p-4 shadow-sm hover:shadow-md transition-shadow duration-300"
                         >
-                          {/* FOTO */}
+                          {/* FOTO OPTIMIZADA */}
                           <div className="relative aspect-4/5 overflow-hidden rounded-xl mb-4 bg-gray-50">
                             <img
-                              src={mainImageUrl}
+                              src={optimizeImage(mainImageUrl, 600)} // 600px para grid
                               alt={product.name}
+                              loading="lazy"
                               className="absolute inset-0 w-full h-full object-cover z-10 transition-opacity duration-500 group-hover:opacity-0"
                             />
                             <img
-                              src={hoverImageUrl}
-                              alt="Hover"
+                              src={optimizeImage(hoverImageUrl, 600)}
+                              alt={`${product.name} hover`}
+                              loading="lazy"
                               className="absolute inset-0 w-full h-full object-cover z-0"
                             />
                           </div>
 
-                          {/* INFO */}
                           <div className="flex flex-col grow text-center items-center px-1">
                             <h3 className="text-[17px] md:text-xl font-black uppercase text-black-bean mb-2 leading-tight tracking-tight">
                               {product.name}
                             </h3>
-
-                            <p className="text-black-bean/60 text-[13px] md:text-sm leading-snug mb-4 font-medium line-clamp-2 md:line-clamp-3">
+                            <p className="text-black-bean/60 text-[13px] md:text-sm leading-snug mb-4 font-medium line-clamp-2">
                               {product.shortDescription || ""}
                             </p>
 
-                            {/* Precio Móvil */}
                             <span className="text-[#D97E8A] font-black text-[16px] md:text-lg mb-2 md:hidden">
                               ${product.price}
                             </span>
 
-                            {/* BOTÓN DESKTOP */}
                             <div className="hidden md:flex mt-auto w-full pt-2">
                               <button className="w-full bg-black-bean text-white py-4 rounded-xl text-[13px] font-black uppercase tracking-widest hover:bg-[#D97E8A] transition-colors duration-300 flex justify-center gap-2">
                                 <span>
                                   {product.shapeType
                                     ? "Personalizar"
-                                    : "Agregar al carrito"}
+                                    : "Agregar"}
                                 </span>
                                 <span className="opacity-30">|</span>
                                 <span>${product.price}</span>
@@ -226,7 +211,7 @@ const Products = () => {
                     {remainingCount > 0 && !isExpanded ? (
                       <button
                         onClick={() => toggleSection(section._id)}
-                        className="inline-flex items-center gap-2 px-10 py-4 border-2 border-[#D97E8A] rounded-full text-[#D97E8A] font-black text-[10px] uppercase tracking-widest hover:bg-[#D97E8A] hover:border-[#e64a85] hover:text-white transition-all duration-300"
+                        className="inline-flex items-center gap-2 px-10 py-4 border-2 border-[#D97E8A] rounded-full text-[#D97E8A] font-black text-[10px] uppercase tracking-widest hover:bg-[#D97E8A] hover:text-white transition-all duration-300"
                       >
                         <Plus size={14} /> Ver los {remainingCount} restantes
                       </button>

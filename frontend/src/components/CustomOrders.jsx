@@ -1,7 +1,12 @@
 import React from "react";
 import { Link } from "react-router-dom";
+import { optimizeImage } from "../utils/imageOptimizer.js"; // 1. Importamos el optimizador
 
 const CustomOrders = () => {
+  // 2. Definimos la URL de la imagen (puedes moverla a una constante o recibirla por props)
+  const eventImageUrl =
+    "https://images.unsplash.com/photo-1578985545062-69928b1d9587";
+
   return (
     <section className="relative overflow-hidden bg-[#D1EAD8]">
       <div className="max-w-350 mx-auto flex flex-col md:flex-row items-center min-h-112.5">
@@ -25,7 +30,7 @@ const CustomOrders = () => {
           </Link>
         </div>
 
-        {/* LADO DERECHO: RAYAS Y IMAGEN (40%) */}
+        {/* LADO DERECHO: RAYAS E IMAGEN (40%) */}
         <div className="relative w-full md:w-[40%] h-87.5 md:h-full flex items-center justify-center">
           {/* Fondo de rayas verticales */}
           <div
@@ -38,9 +43,11 @@ const CustomOrders = () => {
           {/* Imagen con marco festoneado (Scalloped Frame) */}
           <div className="relative z-10 w-64 h-80 md:w-72 md:h-96">
             <div className="absolute inset-0 bg-[#D1EAD8] clip-festoneado transform rotate-2"></div>
+            {/* 3. Aplicamos la optimización con un ancho de 800px (suficiente para este tamaño de marco) */}
             <img
-              src="https://images.unsplash.com/photo-1578985545062-69928b1d9587"
+              src={optimizeImage(eventImageUrl, 800)}
               alt="Pastel de Evento"
+              loading="lazy" // Al estar al final de la página, el lazy loading es vital
               className="absolute inset-2 w-full h-full object-cover clip-festoneado bg-white"
             />
           </div>
@@ -49,7 +56,6 @@ const CustomOrders = () => {
 
       <style jsx>{`
         .clip-festoneado {
-          /* Forma simplificada que imita el borde ondulado de la referencia */
           clip-path: polygon(
             50% 0%,
             65% 5%,

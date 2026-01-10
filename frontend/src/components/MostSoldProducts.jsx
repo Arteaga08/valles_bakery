@@ -4,6 +4,7 @@ import { Navigation, Scrollbar, FreeMode } from "swiper/modules";
 import { Link } from "react-router-dom";
 import API from "../service/api";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import { optimizeImage } from "../utils/imageOptimizer.js"; // 1. Importamos el optimizador
 
 import "swiper/css";
 import "swiper/css/navigation";
@@ -22,7 +23,6 @@ const MostSoldProducts = () => {
     const fetchProducts = async () => {
       try {
         const { data } = await API.get("/products");
-        // Solo los más vendidos
         const bestSellers = data.filter((p) => p.isBestSeller);
         setProducts(bestSellers);
       } catch (error) {
@@ -67,8 +67,8 @@ const MostSoldProducts = () => {
           <span className="text-new-york-pink">Vendidos</span>
         </h2>
         <p className="text-lg text-gray-800 max-w-2xl mx-auto font-medium">
-          Iconic layer cakes with unfrosted sides, gooey pie, and fudgy Cake
-          Truffles.
+          Dulzura artesanal en cada capa: desde pasteles clásicos hasta nuestras
+          famosas trufas.
         </p>
       </div>
 
@@ -97,6 +97,7 @@ const MostSoldProducts = () => {
               ? "opacity-100 translate-x-0"
               : "opacity-0 -translate-x-full"
           }`}
+          aria-label="Anterior producto"
         >
           <ChevronLeft size={32} strokeWidth={3} />
         </button>
@@ -118,6 +119,7 @@ const MostSoldProducts = () => {
               ? "opacity-100 translate-x-0"
               : "opacity-0 translate-x-full"
           }`}
+          aria-label="Siguiente producto"
         >
           <ChevronRight size={32} strokeWidth={3} />
         </button>
@@ -150,6 +152,7 @@ const MostSoldProducts = () => {
           className="pb-24!"
         >
           {products.map((product) => {
+            // 2. Extraemos y optimizamos las imágenes (Principal y Hover)
             const mainImg = product.images.find((i) => i.isMain)?.url;
             const hoverImg = product.images.find((i) => !i.isMain)?.url;
 
@@ -166,13 +169,18 @@ const MostSoldProducts = () => {
                       </span>
                     )}
 
+                    {/* 3. Aplicamos optimizeImage a ambas imágenes con ancho 600 */}
                     <img
-                      src={mainImg}
+                      src={optimizeImage(mainImg, 600)}
+                      alt={`Pastel ${product.name}`}
+                      loading="lazy"
                       className="absolute inset-0 w-full h-full object-cover transition-opacity duration-700 group-hover/card:opacity-0"
                     />
                     {hoverImg && (
                       <img
-                        src={hoverImg}
+                        src={optimizeImage(hoverImg, 600)}
+                        alt={`Vista detallada de ${product.name}`}
+                        loading="lazy"
                         className="absolute inset-0 w-full h-full object-cover opacity-0 transition-opacity duration-700 group-hover/card:opacity-100"
                       />
                     )}
@@ -182,12 +190,9 @@ const MostSoldProducts = () => {
                     <h3 className="font-black text-[16px] md:text-[18px] uppercase tracking-tight text-gray-900 mb-1">
                       {product.name}
                     </h3>
-
-                    {/* PRECIO */}
                     <p className="text-[15px] font-semibold text-new-york-pink mb-1">
                       ${product.price.toFixed(2)} MXN
                     </p>
-
                     <p className="text-sm text-gray-700 line-clamp-2">
                       {product.shortDescription}
                     </p>
@@ -210,10 +215,6 @@ const MostSoldProducts = () => {
             background: #e64a85 !important;
             border-radius: 10px;
             transition: transform 0.9s cubic-bezier(0.25, 1, 0.5, 1) !important;
-          }
-          /* Estilo opcional para que la transición de imágenes sea más suave */
-          .group-hover\/card\:opacity-100 {
-            transition: opacity 0.7s ease-in-out;
           }
         `}</style>
       </div>

@@ -1,0 +1,10 @@
+# Permitir que todos los buscadores indexen el sitio
+User-agent: *
+Allow: /
+
+# Bloquear solo la carpeta de administración para que no aparezca en Google
+Disallow: /admin
+Disallow: /login
+
+# Indica dónde está tu sitemap (si lo tienes, si no, puedes borrar esta línea)
+# Sitemap:

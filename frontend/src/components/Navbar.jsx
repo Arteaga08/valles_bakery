@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import {
   ShoppingCart,
   Menu,
@@ -10,28 +10,16 @@ import {
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import API from "../service/api";
-import { useCart } from "../context/CartContext"; // 1. Importamos el hook del carrito
+import { useCart } from "../context/CartContext";
+import { useShop } from "../context/ShopContext"; // Importamos el nuevo contexto global
 
 const Navbar = () => {
-  const [categories, setCategories] = useState([]);
   const [isOpen, setIsOpen] = useState(false);
-  const { cart } = useCart(); // 2. Obtenemos el estado del carrito
+  const { cart } = useCart();
+  // Extraemos categorías y el estado de carga del contexto global
+  const { categories, loading } = useShop();
 
-  // Calculamos el total de productos (sumando cantidades)
   const totalItems = cart.reduce((acc, item) => acc + item.quantity, 0);
-
-  useEffect(() => {
-    const fetchCats = async () => {
-      try {
-        const { data } = await API.get("/categories");
-        setCategories(data);
-      } catch (error) {
-        console.error("Error en Navbar:", error);
-      }
-    };
-    fetchCats();
-  }, []);
 
   return (
     <nav className="bg-white border-b border-gray-100 sticky top-0 z-50 px-4 py-3">
@@ -46,7 +34,7 @@ const Navbar = () => {
 
         {/* LOGO */}
         <Link to="/" className="flex flex-col items-center group">
-          <h1 className="text-2xl md:text-3xl font-bold font-fraunces leading-tight tracking-tighter">
+          <h1 className="text-2xl md:text-3xl font-bold font-fraunces leading-tight tracking-tighter text-center">
             <span className="text-black-bean">VALLÉE</span>{" "}
             <span className="text-new-york-pink italic font-serif font-light">
               Cupcakes
@@ -54,19 +42,17 @@ const Navbar = () => {
           </h1>
         </Link>
 
-        {/* CARRITO - Transformado en Link y Dinámico */}
+        {/* CARRITO */}
         <Link
           to="/carrito"
           className="relative p-1.5 border border-black-bean rounded-full hover:bg-gray-50 transition-colors"
         >
           <ShoppingCart size={16} className="text-black-bean" />
-
-          {/* Solo mostramos la burbuja si hay productos */}
           {totalItems > 0 && (
             <motion.span
               initial={{ scale: 0 }}
               animate={{ scale: 1 }}
-              key={totalItems} // Esto hace que "salte" cuando cambia el número
+              key={totalItems}
               className="absolute -top-1.5 -right-1.5 bg-new-york-pink text-white text-[8px] font-bold rounded-full h-4 w-4 flex items-center justify-center border border-white"
             >
               {totalItems}
@@ -78,7 +64,7 @@ const Navbar = () => {
       <AnimatePresence>
         {isOpen && (
           <>
-            {/* OVERLAY Y SIDEBAR SE MANTIENEN IGUAL... */}
+            {/* OVERLAY */}
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -87,6 +73,7 @@ const Navbar = () => {
               className="fixed inset-0 bg-black-bean/40 backdrop-blur-sm z-40"
             />
 
+            {/* SIDEBAR */}
             <motion.div
               initial={{ x: "-100%" }}
               animate={{ x: 0 }}
@@ -113,7 +100,6 @@ const Navbar = () => {
                   >
                     Inicio
                   </Link>
-                  {/* Link al carrito dentro del menú también */}
                   <Link
                     to="/carrito"
                     onClick={() => setIsOpen(false)}
@@ -134,27 +120,41 @@ const Navbar = () => {
                   <p className="text-[10px] uppercase tracking-[0.2em] text-gray-400 font-bold mb-6">
                     Nuestras Delicias
                   </p>
+
                   <div className="space-y-5">
-                    {categories.map((cat) => (
-                      <Link
-                        key={cat._id}
-                        to={`/productos?categoria=${cat.slug}`}
-                        onClick={() => setIsOpen(false)}
-                        className="flex justify-between items-center text-lg text-black-bean group py-1"
-                      >
-                        <span className="group-hover:text-new-york-pink transition-colors duration-300">
-                          {cat.name}
-                        </span>
-                        <div className="h-px flex-1 mx-4 bg-gray-100 group-hover:bg-new-york-pink/30 transition-all duration-500" />
-                        <div className="text-new-york-pink opacity-0 group-hover:opacity-100 transition-all duration-300 transform group-hover:scale-110">
-                          <CakeSlice size={18} strokeWidth={2.5} />
-                        </div>
-                      </Link>
-                    ))}
+                    {/* RENDERIZADO SEGURO: Si está cargando, mostramos un estado sutil */}
+                    {loading ? (
+                      <div className="space-y-4">
+                        {[1, 2, 3].map((n) => (
+                          <div
+                            key={n}
+                            className="h-4 bg-gray-100 animate-pulse rounded w-3/4"
+                          />
+                        ))}
+                      </div>
+                    ) : (
+                      categories.map((cat) => (
+                        <Link
+                          key={cat._id}
+                          to={`/productos?categoria=${cat.slug}`}
+                          onClick={() => setIsOpen(false)}
+                          className="flex justify-between items-center text-lg text-black-bean group py-1"
+                        >
+                          <span className="group-hover:text-new-york-pink transition-colors duration-300">
+                            {cat.name}
+                          </span>
+                          <div className="h-px flex-1 mx-4 bg-gray-100 group-hover:bg-new-york-pink/30 transition-all duration-500" />
+                          <div className="text-new-york-pink opacity-0 group-hover:opacity-100 transition-all duration-300 transform group-hover:scale-110">
+                            <CakeSlice size={18} strokeWidth={2.5} />
+                          </div>
+                        </Link>
+                      ))
+                    )}
                   </div>
                 </div>
               </div>
 
+              {/* FOOTER DEL MENÚ */}
               <div className="p-8 border-t border-gray-100 bg-gray-50/30">
                 <div className="flex justify-center space-x-6 text-black-bean">
                   <a

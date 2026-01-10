@@ -1,42 +1,41 @@
+/* index.css - Optimizado para Vallée Cupcakes */
+
+/* 1. Eliminamos los límites de Vite para que el diseño ocupe todo el ancho */
 #root {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
-  text-align: center;
+  width: 100%;
+  margin: 0;
+  padding: 0;
 }
 
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
-}
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.react:hover {
-  filter: drop-shadow(0 0 2em #61dafbaa);
+/* 2. Optimización de Renderizado: Evitamos que el navegador calcule estilos que no existen */
+body {
+  margin: 0;
+  display: flex;
+  min-width: 320px;
+  min-height: 100vh;
+  /* Aseguramos que el color de fondo coincida con la marca para evitar el destello blanco */
+  background-color: #faf7f2;
+  overflow-x: hidden;
 }
 
-@keyframes logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
+/* 3. Tipografía Crítica: Esto ayuda al FCP al evitar que el texto desaparezca */
+@layer base {
+  html {
+    -webkit-tap-highlight-color: transparent;
+    scroll-behavior: smooth;
   }
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  a:nth-of-type(2) .logo {
-    animation: logo-spin infinite 20s linear;
-  }
+/* 4. Fix para el Scrollbar Horizontal en móvil (Instrucción guardada) */
+.no-scrollbar::-webkit-scrollbar {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
 }
 
-.card {
-  padding: 2em;
+.no-scrollbar {
+  -ms-overflow-style: none !important;
+  scrollbar-width: none !important;
 }
 
-.read-the-docs {
-  color: #888;
-}
+/* 5. Eliminamos todos los estilos .logo, .card y logo-spin de Vite */
